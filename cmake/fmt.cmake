@@ -11,20 +11,20 @@ cmake_path(APPEND fmt_bin ${fmt_dir} "bin")
 # find_package(fmt 9.1.0)
 # if(NOT fmt_FOUND)
 if(TRUE)
-  message(">> fetching fmt of required version!")
-  include(FetchContent)
-  FetchContent_Declare(fmt
-    GIT_REPOSITORY    https://github.com/fmtlib/fmt.git
-    GIT_TAG           9.1.0
-    SUBBUILD_DIR      ${fmt_sub}
-    SOURCE_DIR        ${fmt_src}
-    BINARY_DIR        ${fmt_bin}
-  )
-  # option(FMT_INSTALL "" ON)
-  option(FMT_OS "" OFF)
-  FetchContent_MakeAvailable(fmt)
+    message(">> fetching fmt of required version!")
+    include(FetchContent)
+    FetchContent_Declare(fmt
+        GIT_REPOSITORY   https://github.com/fmtlib/fmt.git
+        GIT_TAG          9.1.0
+        SUBBUILD_DIR     ${fmt_sub}
+        SOURCE_DIR       ${fmt_src}
+        BINARY_DIR       ${fmt_bin}
+    )
+    # option(FMT_INSTALL "" ON)
+    option(FMT_OS "" OFF)
+    FetchContent_MakeAvailable(fmt)
 else()
-  message(">> found fmt of required version!")
+    message(">> found fmt of required version!")
 endif()
 
 target_include_directories(wndx_sane_deps PUBLIC "${fmt_src}/include")
