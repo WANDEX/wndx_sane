@@ -4,7 +4,7 @@
 #include <fmt/format.h>
 
 
-namespace wndxsn {
+namespace wndx {
 
 // log msg can have different log levels.
 // the bigger the level, the less messages:
@@ -19,15 +19,15 @@ enum class LogLevel
   CRIT,     // CRITICAL
 };
 
-} // namespace wndxsn
+} // namespace wndx
 
 // NOTE: fmt demands to specialize/declare this here!
 // [template_spec_redecl_out_of_scope].
 // @brief format enum log levels in the readable text form.
 template <> struct
-fmt::formatter<wndxsn::LogLevel> : formatter<string_view> {
+fmt::formatter<wndx::LogLevel> : formatter<string_view> {
   // parse is inherited from formatter<string_view>.
-  using LL = wndxsn::LogLevel;
+  using LL = wndx::LogLevel;
   template <typename FormatContext>
   auto format(LL el, FormatContext& ctx) const {
     string_view name = "unknown";
@@ -45,7 +45,7 @@ fmt::formatter<wndxsn::LogLevel> : formatter<string_view> {
 };
 
 // overload for the std::ostream (to print LogLevel in the readable text form)
-inline std::ostream& operator<<(std::ostream& os, wndxsn::LogLevel const ll) {
+inline std::ostream& operator<<(std::ostream& os, wndx::LogLevel const ll) {
   return os << fmt::to_string(ll);
 }
 

@@ -12,7 +12,7 @@
 #include <string_view>
 
 
-namespace wndxsn {
+namespace wndx {
 
 class Logger final
 {
@@ -78,8 +78,10 @@ private:
  * (usually logger is needed for the whole life of the program anyway!) */
 inline Logger log_g {};
 
-#define WNDX_LOG(log_level, format, ...) \
-log_g.wrapper_fmt_args(__FILE__, __LINE__, log_level, format, __VA_ARGS__)
+} // namespace wndx
 
-} // namespace wndxsn
+#ifndef WNDX_LOG
+#define WNDX_LOG(log_level, format, ...) \
+wndx::log_g.wrapper_fmt_args(__FILE__, __LINE__, log_level, format, __VA_ARGS__)
+#endif//WNDX_LOG
 

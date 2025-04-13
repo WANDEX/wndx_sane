@@ -2,7 +2,9 @@
 
 #include "aliases.hpp"
 
-namespace wndxsn {
+#include "log_level.hpp"
+
+namespace wndx {
 namespace cfg {
 
 // log urgency level
@@ -10,11 +12,11 @@ namespace cfg {
 inline static constexpr LL urgency{ LL::DBUG }; // development level (all messages)
 
 // default log file path
-inline static constexpr std::string_view log_fpath{ "/tmp/wndxsn/logs/default.log" };
+inline static constexpr std::string_view log_fpath{ "/tmp/wndx/logs/default.log" };
 
 // default (client UID / device MAC) unique to the client/device.
 inline static constexpr std::string_view def_uid{ "f000::f000:f000:f000:f000" };
 
 } // namespace cfg
-} // namespace wndxsn
+} // namespace wndx
 

@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <string_view>
 
-namespace wndxsn {
+namespace wndx {
 
 // @brief wrapper for forced computation at compile time.
 // the destructor of the type used in the function must be constexpr.
@@ -21,22 +21,27 @@ using namespace std::literals;
 enum class LogLevel; // forward declare
 using LL = LogLevel;
 
-using s8  = int8_t;
-using s16 = int16_t;
-using s32 = int32_t;
-using s64 = int64_t;
+// using s8  = int8_t;
+// using s16 = int16_t;
+// using s32 = int32_t;
+// using s64 = int64_t;
+
+using i8  = int8_t;
+using i16 = int16_t;
+using i32 = int32_t;
+using i64 = int64_t;
 
 using u8  = uint8_t;
 using u16 = uint16_t;
 using u32 = uint32_t;
 using u64 = uint64_t;
 
-} // namespace wndxsn
+} // namespace wndx
 
 /**
  * In the end of the file after defining project-wide aliases.
  * For the convenience:
  * To not include logger declarations separately in each translation unit.
  */
-#include "log.hpp"
+// #include "log.hpp"
 
