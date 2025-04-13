@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.23)
 
 ## ^ POLICIES
 project(
     wndx_sane
-    VERSION       0.0.0.1
+    VERSION       0.0.1
     LANGUAGES     C CXX
     DESCRIPTION   ""
     HOMEPAGE_URL  "https://github.com/WANDEX/wndx_sane"
