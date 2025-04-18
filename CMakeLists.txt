@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.23)
 ## ^ POLICIES
 project(
   wndx_sane
-  VERSION       0.0.1
+  VERSION       0.0.2
   LANGUAGES     CXX
   # LANGUAGES     C CXX # XXX
   DESCRIPTION   ""
