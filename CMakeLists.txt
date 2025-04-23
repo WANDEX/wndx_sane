@@ -5,8 +5,7 @@ project(
   wndx_sane
   VERSION       0.0.2
   LANGUAGES     CXX
-  # LANGUAGES     C CXX # XXX
-  DESCRIPTION   ""
+  DESCRIPTION   "wndx::sane lib - handcrafted CMake modules, modern CMake targets"
   HOMEPAGE_URL  "https://github.com/WANDEX/wndx_sane"
 )
 
@@ -36,9 +35,6 @@ function(targets_and_linking)
     PHD "include/wndx/sane"
   )
 
-  ## link core library with the libc -lc (to work with the BSD API: socket, signal)
-  # target_link_libraries(sane_core INTERFACE c) # XXX: project is linking to libc by itself
-
   ## link sources with project dependencies from the core library target
   target_link_libraries(sane_src INTERFACE wndx::sane::core)
 
@@ -61,7 +57,7 @@ endif()
 
 if(WNDX_SANE_IS_TOP_PROJECT)
   option(WNDX_SANE_BUILD_SRC        "whether or not src should be built"          ON)
-  option(WNDX_SANE_BUILD_TESTS      "whether or not tests should be built"        OFF) # TODO: UNIMPLEMENTED
+  option(WNDX_SANE_BUILD_TESTS      "whether or not tests should be built"        OFF)
   option(WNDX_SANE_BUILD_PACKAGE    "whether or not the package should be built"  ON)
   option(WNDX_SANE_COVERAGE_ENABLE  "whether or not to enable the tests coverage" OFF)
   option(WNDX_SANE_COVERAGE_CLEAN   "clean coverage data before taking new"       ON)
@@ -77,7 +73,7 @@ if(WNDX_SANE_IS_TOP_PROJECT)
   ## however, when building lib as a DLL, it is important to have the DLL in the same dir
   ## as the executable using it. Thus, we put all executables in a single /bin dir.
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-  ## On macOS, property ignored for the linker import files
+  ## on macOS, property ignored for the linker import files
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
