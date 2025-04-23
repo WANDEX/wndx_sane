@@ -9,16 +9,20 @@ function(wndx_sane_find) ## args
     "" # mvk
     ${ARGN}
   )
+  set(fun "wndx_sane_find()")
+
   message(DEBUG "PKG_NAME: ${arg_PKG_NAME}, PKG_VER: ${arg_PKG_VER}, PKG_TGT: ${arg_PKG_TGT}")
   message(DEBUG "PKG_REPO: ${arg_PKG_REPO}, PKG_TAG: ${arg_PKG_TAG}")
+
   if(arg_UNPARSED_ARGUMENTS)
-    message(WARNING "UNPARSED: wndx_sane_find() ${arg_UNPARSED_ARGUMENTS}")
+    message(WARNING "UNPARSED: ${fun} ${arg_UNPARSED_ARGUMENTS}")
   endif()
   if(arg_KEYWORDS_MISSING_VALUES)
-    message(FATAL_ERROR " MISSING: wndx_sane_find() ${arg_KEYWORDS_MISSING_VALUES}")
+    message(FATAL_ERROR " MISSING: ${fun} ${arg_KEYWORDS_MISSING_VALUES}")
   endif()
+
   if(NOT arg_PKG_TGT MATCHES "^.*::.*$")
-    message(FATAL_ERROR "wndx_sane_find() PKG_TGT not a valid target ${arg_PKG_TGT}")
+    message(FATAL_ERROR "${fun} PKG_TGT not a valid target ${arg_PKG_TGT}")
   endif()
 
   set(pkg_name "${arg_PKG_NAME}") ## package name

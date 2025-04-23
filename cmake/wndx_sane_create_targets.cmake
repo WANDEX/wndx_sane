@@ -22,22 +22,26 @@ function(wndx_sane_create_targets) ## args
     "" # mvk
     ${ARGN}
   )
-  message(DEBUG "CXX_STD: ${arg_CXX_STD}, PHD: ${arg_PHD}")
+  set(fun "wndx_sane_create_targets()")
+
+  message(DEBUG "${fun} CXX_STD: ${arg_CXX_STD}, PHD: ${arg_PHD}")
+
   if(arg_UNPARSED_ARGUMENTS)
-    message(WARNING "UNPARSED: wndx_sane_create_targets() ${arg_UNPARSED_ARGUMENTS}")
+    message(WARNING "UNPARSED: ${fun} ${arg_UNPARSED_ARGUMENTS}")
   endif()
   if(arg_KEYWORDS_MISSING_VALUES)
-    message(WARNING " MISSING: wndx_sane_create_targets() ${arg_KEYWORDS_MISSING_VALUES}")
+    message(WARNING " MISSING: ${fun} ${arg_KEYWORDS_MISSING_VALUES}")
   endif()
+
   if(NOT arg_PFX MATCHES "^.+$")
-    message(FATAL_ERROR "wndx_sane_create_targets() PFX not provided!")
+    message(FATAL_ERROR "${fun} PFX not provided!")
   endif()
   if(NOT arg_LIB MATCHES "^.+$")
-    message(FATAL_ERROR "wndx_sane_create_targets() LIB_NAME_EXPORT not provided!")
+    message(FATAL_ERROR "${fun} LIB_NAME_EXPORT not provided!")
   endif()
   if(NOT arg_CXX_STD MATCHES "^cxx_std_..$")
     set(arg_CXX_STD cxx_std_20)
-    message(WARNING "wndx_sane_create_targets() CXX_STD not provided => used by default: ${arg_CXX_STD}")
+    message(WARNING "${fun} CXX_STD not provided => used by default: ${arg_CXX_STD}")
   endif()
 
   ## sanity checks of the user input: PHD
@@ -46,12 +50,12 @@ function(wndx_sane_create_targets) ## args
   cmake_path(APPEND PHD_w_prefix "${CMAKE_CURRENT_SOURCE_DIR}" "${arg_PHD}")
   cmake_path(IS_PREFIX CMAKE_CURRENT_SOURCE_DIR ${PHD_w_prefix} NORMALIZE PHD_is_prefix)
   if(NOT PHD_is_prefix)
-    message(FATAL_ERROR "wndx_sane_create_targets() "
-      "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}\nNOT A PREFIX OF: ${PHD_w_prefix}"
+    message(FATAL_ERROR "${fun} CMAKE_CURRENT_SOURCE_DIR: "
+      "${CMAKE_CURRENT_SOURCE_DIR}\nNOT A PREFIX OF: ${PHD_w_prefix}"
     )
   endif()
   if(NOT IS_DIRECTORY "${PHD_w_prefix}")
-    message(FATAL_ERROR "wndx_sane_create_targets() IS NOT A DIR: ${PHD_w_prefix}")
+    message(FATAL_ERROR "${fun} IS NOT A DIR: ${PHD_w_prefix}")
   endif()
 
   ## default include dir path for PUBLIC HEADERS - common to all properly configured projects.
@@ -66,9 +70,9 @@ function(wndx_sane_create_targets) ## args
   )
   list(APPEND WNDX_SANE_HEADERS_LIST ${wndx_sane_headers})
 
-  message(DEBUG ">> RELATIVE TO THE CMAKE_CURRENT_SOURCE_DIR LIST OF HEADERS:")
+  message(DEBUG "${fun} RELATIVE TO THE CMAKE_CURRENT_SOURCE_DIR LIST OF HEADERS:")
   foreach(fpath ${WNDX_SANE_HEADERS_LIST})
-    message(DEBUG ">> ${fpath}")
+    message(DEBUG "${fpath}")
   endforeach(fpath)
 
   ## create target base: common to targets inheritance
@@ -180,7 +184,7 @@ function(wndx_sane_create_targets) ## args
     ## credit: https://gavinchou.github.io/experience/summary/syntax/gcc-address-sanitizer/
     ## TODO: remove this if clause as it is not finished!
     if(WNDX_SANE_SNTZ_ADDR)
-      message(NOTICE ">> ADDRESS SANITIZER ENABLED")
+      message(NOTICE ">> ${fun} ADDRESS SANITIZER ENABLED")
       target_compile_options(${arg_LIB}_dev INTERFACE
         -ggdb -fno-omit-frame-pointer # call stack and line number report format
         # -fsanitize=address

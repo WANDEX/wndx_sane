@@ -8,16 +8,20 @@ function(wndx_sane_install) ## args
     "TARGETS;PATTERNS" # mvk
     ${ARGN}
   )
+  set(fun "wndx_sane_install()")
+
   message(DEBUG "PATTERNS: ${arg_PATTERNS}, TARGETS: ${arg_TARGETS}")
+
   if(arg_UNPARSED_ARGUMENTS)
-    message(WARNING "UNPARSED: wndx_sane_install() ${arg_UNPARSED_ARGUMENTS}")
+    message(WARNING "UNPARSED: ${fun} ${arg_UNPARSED_ARGUMENTS}")
   endif()
   if(arg_KEYWORDS_MISSING_VALUES)
-    message(WARNING " MISSING: wndx_sane_install() ${arg_KEYWORDS_MISSING_VALUES}")
+    message(WARNING " MISSING: ${fun} ${arg_KEYWORDS_MISSING_VALUES}")
   endif()
+
   if(NOT arg_PATTERNS)
     set(arg_PATTERNS "*.hpp" "*.h" "*.hh")
-    message(WARNING "wndx_sane_install() PATTERNS not provided => used by default: ${arg_PATTERNS}")
+    message(WARNING "${fun} PATTERNS not provided => used by default: ${arg_PATTERNS}")
   endif()
 
   message(STATUS "Generating Install")
