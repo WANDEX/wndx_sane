@@ -1,59 +1,26 @@
 include_guard(GLOBAL)
 ## cmake module from WANDEX/wndx_sane lib.
 
-## TODO: use wndx_sane_find?
+## BEG CONF
+set(pkg_name "cxxopts")
+set(pkg_repo "https://github.com/jarro2783/cxxopts.git")
+set(pkg_ver "3.1.1")
+set(pkg_tag "v${pkg_ver}")
+set(pkg_tgt "${pkg_name}::${pkg_name}") ## XXX: fake target
 
-cmake_path(APPEND dep_dir ${PROJECT_BINARY_DIR} "_deps")
+option(CXXOPTS_ENABLE_INSTALL OFF)
+## END CONF
 
-cmake_path(APPEND cxxopts_dir ${dep_dir}     "cxxopts") # lib dir root
-cmake_path(APPEND cxxopts_sub ${cxxopts_dir} "sub")
-cmake_path(APPEND cxxopts_src ${cxxopts_dir} "src")
-cmake_path(APPEND cxxopts_bin ${cxxopts_dir} "bin")
-
-cmake_path(APPEND install_interface_pfx "include" "${PROJECT_NAME}" "cxxopts")
-
-## so that the find_package will look at the specified dir first
-# XXX or not needed?
-set(cxxopts_DIR "${cxxopts_bin}")
-
-# find_package(cxxopts 3.1.1)
-# if(NOT cxxopts_FOUND)
-if(TRUE) # XXX: ^ will not work cxxopts has weird configuration...
-  message(">> fetching cxxopts of required version!")
-  include(FetchContent)
-  FetchContent_Declare(cxxopts
-    GIT_REPOSITORY    https://github.com/jarro2783/cxxopts.git
-    GIT_TAG           v3.1.1
-    SUBBUILD_DIR      ${cxxopts_sub}
-    SOURCE_DIR        ${cxxopts_src}
-    BINARY_DIR        ${cxxopts_bin}
-    OVERRIDE_FIND_PACKAGE
-  )
-  option(CXXOPTS_ENABLE_INSTALL "" OFF)
-  FetchContent_MakeAvailable(cxxopts)
-else()
-  message(">> found cxxopts of required version!")
-endif()
-
-# target_sources(sane_deps PUBLIC cxxopts.hpp)
-
-target_include_directories(sane_deps PUBLIC
-  $<BUILD_INTERFACE:${cxxopts_src}/include>
-  $<INSTALL_INTERFACE:${install_interface_pfx}>
+include(wndx_sane_find)
+wndx_sane_find(
+  PKG_NAME  "${pkg_name}"
+  PKG_REPO  "${pkg_repo}"
+  PKG_TAG   "${pkg_tag}"
+  PKG_VER   "${pkg_ver}"
+  PKG_TGT   "${pkg_tgt}"
+  # FORCE_FETCH
+  PKG_NO_INCL
+  PKG_NO_LINK
+  HFILES "cxxopts.hpp"
 )
 
-if(FALSE)
-  target_sources(sane_deps PUBLIC
-    $<BUILD_INTERFACE:${cxxopts_src}/include/cxxopts.hpp>
-    $<INSTALL_INTERFACE:${install_interface_pfx}/cxxopts.hpp>
-  )
-else()
-  target_sources(sane_deps PUBLIC FILE_SET HEADERS
-    # BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
-    FILES "${cxxopts_src}/include/cxxopts.hpp"
-  )
-endif()
-
-install(FILES "${cxxopts_src}/include/cxxopts.hpp"
-  DESTINATION "${install_interface_pfx}"
-)
