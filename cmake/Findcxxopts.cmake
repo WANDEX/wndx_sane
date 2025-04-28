@@ -19,7 +19,6 @@ wndx_sane_find(
   PKG_VER   "${pkg_ver}"
   PKG_TGT   "${pkg_tgt}"
   # FORCE_FETCH
-  PKG_NO_INCL
   PKG_NO_LINK
   HFILES "cxxopts.hpp"
 )

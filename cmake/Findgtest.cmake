@@ -31,17 +31,8 @@ wndx_sane_find(
   PKG_VER   "${pkg_ver}"
   PKG_TGT   "${pkg_tgt}"
   FORCE_FETCH
-  # PKG_NO_INCL
   PKG_NO_LINK
 )
-
-## I tried a lot, but still seems that gtest is a special child, just like windows.
-## gtest has hardcoded paths, how to override them properly? (nothing works, it drives me nuts)
-# RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-# LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-# ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-# PDB_OUTPUT_DIRECTORY     "${CMAKE_BINARY_DIR}/bin"
-
 
 ## When Google Test is included directly rather than through find_package, the aliases are missing.
 if(NOT TARGET ${pkg_name}::gtest)

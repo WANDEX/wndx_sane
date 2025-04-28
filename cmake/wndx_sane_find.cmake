@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 ## function to find/fetch module
 function(wndx_sane_find) ## args
   cmake_parse_arguments(arg # pfx
-    "FORCE_FETCH;PKG_NO_LINK;PKG_NO_INCL" # opt
+    "FORCE_FETCH;PKG_NO_LINK" # opt
     "PKG_NAME;PKG_REPO;PKG_TAG;PKG_VER;PKG_TGT" # ovk
     "HFILES" # mvk
     ${ARGN}
