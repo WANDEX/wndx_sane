@@ -12,9 +12,9 @@ function(wndx_sane_find) ## args
   set(fun "wndx_sane_find()")
 
   ## optional HEADER FILES list (for the header only libraries)
-  if(arg_KEYWORDS_MISSING_VALUES MATCHES ".*HFILES.*")
+  if(NOT arg_HFILES OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*HFILES.*")
     list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "HFILES")
-    cmake_path(SET arg_HFILES NORMALIZE "${CMAKE_CURRENT_BINARY_DIR}")
+    unset(arg_HFILES) # unset as arg "" is also not acceptable!
   endif()
 
   message(DEBUG "${fun} PKG_NAME: ${arg_PKG_NAME}, PKG_VER: ${arg_PKG_VER}, PKG_TGT: ${arg_PKG_TGT}")

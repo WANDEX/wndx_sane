@@ -11,7 +11,7 @@ function(wndx_sane_coverage) ## args
   set(fun "wndx_sane_coverage()")
 
   ## use default value if not explicitly provided
-  if(arg_KEYWORDS_MISSING_VALUES MATCHES ".*CLEAN.*")
+  if(NOT arg_CLEAN OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*CLEAN.*")
     list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "CLEAN")
     set(arg_CLEAN FALSE)
   endif()

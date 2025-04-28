@@ -11,7 +11,7 @@ function(wndx_sane_package) ## args
   set(fun "wndx_sane_package()")
 
   ## use default destination dir if not explicitly provided
-  if(arg_KEYWORDS_MISSING_VALUES MATCHES ".*DST_DIR.*")
+  if(NOT arg_DST_DIR OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*DST_DIR.*")
     list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "DST_DIR")
     cmake_path(SET arg_DST_DIR NORMALIZE "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
