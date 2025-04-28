@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 function(wndx_sane_package) ## args
   cmake_parse_arguments(arg # pfx
     "" # opt
-    "TGT_NAME;SUFFIX;DST_DIR" # ovk
+    "SUFFIX;DST_DIR" # ovk
     "FILES" # mvk
     ${ARGN}
   )
@@ -23,9 +23,6 @@ function(wndx_sane_package) ## args
     message(WARNING " MISSING: ${fun} ${arg_KEYWORDS_MISSING_VALUES}")
   endif()
 
-  if(NOT arg_TGT_NAME MATCHES "^.+$")
-    message(FATAL_ERROR "${fun} TGT_NAME not provided!")
-  endif()
   if(NOT arg_SUFFIX MATCHES "^.+$")
     message(FATAL_ERROR "${fun} SUFFIX not provided!")
   endif()
@@ -36,16 +33,17 @@ function(wndx_sane_package) ## args
     message(FATAL_ERROR "${fun} DST_DIR not valid!")
   endif()
 
+  set(tgt_name "package_${arg_SUFFIX}")
   cmake_path(SET dst_dir NORMALIZE "${arg_DST_DIR}")
   set(fname "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${arg_SUFFIX}")
   set(fpath "")
   cmake_path(APPEND fpath "${dst_dir}" "${fname}.tar.gz")
-  message(DEBUG ">> ${fun} tgt: ${arg_TGT_NAME} fpath: ${fpath}")
+  message(DEBUG "${fun} tgt: ${tgt_name} fpath: ${fpath}")
   add_custom_command(
     OUTPUT "${fpath}"
     COMMAND ${CMAKE_COMMAND} -E tar -czf "${fpath}" -- ${arg_FILES}
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     DEPENDS ${arg_FILES}
   )
-  add_custom_target(${arg_TGT_NAME} DEPENDS "${fpath}")
+  add_custom_target(${tgt_name} DEPENDS "${fpath}")
 endfunction()
