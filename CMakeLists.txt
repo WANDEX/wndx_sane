@@ -86,7 +86,7 @@ if(WNDX_SANE_IS_TOP_PROJECT)
 
   if(WNDX_SANE_BUILD_PACKAGE)
     include(wndx_sane_package)
-    wndx_sane_package(TGT_NAME src_package FILES
+    wndx_sane_package(TGT_NAME src_package SUFFIX "src" FILES
       include/ src/ cmake/ CMakeLists.txt LICENSE README.md
     )
   endif(WNDX_SANE_BUILD_PACKAGE)
