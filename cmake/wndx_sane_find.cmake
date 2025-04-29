@@ -17,8 +17,8 @@ function(wndx_sane_find) ## args
     unset(arg_HFILES) # unset as arg "" is also not acceptable!
   endif()
 
-  message(DEBUG "${fun} PKG_NAME: ${arg_PKG_NAME}, PKG_VER: ${arg_PKG_VER}, PKG_TGT: ${arg_PKG_TGT}")
-  message(DEBUG "${fun} PKG_REPO: ${arg_PKG_REPO}, PKG_TAG: ${arg_PKG_TAG}")
+  message(DEBUG "${fun} PKG_NAME: ${arg_PKG_NAME} PKG_VER: ${arg_PKG_VER} PKG_TGT: ${arg_PKG_TGT}")
+  message(DEBUG "${fun} PKG_REPO: ${arg_PKG_REPO} PKG_TAG: ${arg_PKG_TAG}")
 
   if(arg_UNPARSED_ARGUMENTS)
     message(WARNING "UNPARSED: ${fun} ${arg_UNPARSED_ARGUMENTS}")
@@ -109,9 +109,11 @@ function(wndx_sane_find) ## args
     set(DEP_HEADERS_LIST "")
     foreach(hfile ${arg_HFILES})
       set(hpath "")
+      set(hpath_full "")
       cmake_path(APPEND hpath "${rel_path}" "${hfile}")
-      if(NOT IS_READABLE "${hpath}")
-        message(FATAL_ERROR "${fun} NOT READABLE file: ${hpath}")
+      cmake_path(APPEND hpath_full "${CMAKE_CURRENT_SOURCE_DIR}" "${hpath}")
+      if(NOT IS_READABLE "${hpath_full}") # well-defined only for explicit full paths
+        message(FATAL_ERROR "${fun} NOT READABLE file: ${hpath_full}")
       endif()
       list(APPEND DEP_HEADERS_LIST ${hpath})
       message(DEBUG "${fun} hfile: ${hfile} | hpath: ${hpath}")
