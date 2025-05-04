@@ -5,7 +5,7 @@ function(wndx_sane_coverage) ## args
   cmake_parse_arguments(arg # pfx
     "" # opt
     "TGT_NAME;CLEAN" # ovk
-    "TGT_DEPS" # mvk
+    "TGT_DEPS;RMGLOB" # mvk
     ${ARGN}
   )
   set(fun "wndx_sane_coverage()")
@@ -14,6 +14,12 @@ function(wndx_sane_coverage) ## args
   if(NOT arg_CLEAN OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*CLEAN.*")
     list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "CLEAN")
     set(arg_CLEAN FALSE)
+  endif()
+
+  ## use default value if not explicitly provided
+  if(NOT arg_RMGLOB OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*RMGLOB.*")
+    list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "RMGLOB")
+    list(APPEND arg_RMGLOB *.gcda) # *.gcno
   endif()
 
   if(arg_UNPARSED_ARGUMENTS)
@@ -32,7 +38,6 @@ function(wndx_sane_coverage) ## args
 
   include(wndx_sane_funcs)
   under_compiler(GNU)
-  # TODO: this module is not tested, fix after integrating into algorithms library
   if(${GNU_COMP})
     add_library(${arg_TGT_NAME} INTERFACE)
     add_dependencies(${arg_TGT_NAME} ${arg_TGT_DEPS})
@@ -44,17 +49,17 @@ function(wndx_sane_coverage) ## args
       ### before taking new coverage analysis data:
       ## find all coverage files in the project binary dir
       file(GLOB_RECURSE prev_cov_files LIST_DIRECTORIES false
-        ABSOLUTE "${CMAKE_CURRENT_BINARY_DIR}" *.gcda) # XXX *.gcno
+        ABSOLUTE "${CMAKE_CURRENT_BINARY_DIR}" ${arg_RMGLOB})
       ## clean from the previous coverage data files (if any)
       if(NOT prev_cov_files STREQUAL "")
         file(REMOVE ${prev_cov_files})
-        message(NOTICE ">> ${fun} Cleared of previous coverage data files.")
+        message(DEBUG "${fun} cleared of previous coverage data files.")
       else()
-        message(NOTICE ">> ${fun} Nothing to clean up. (no coverage data files found)")
+        message(DEBUG "${fun} nothing to clean up. (no coverage data files found)")
       endif()
-    endif(WNDX_SANE_COVERAGE_CLEAN)
-    message(NOTICE ">> ${fun} Code Coverage will be collected!")
+    endif(arg_CLEAN)
+    message(NOTICE "${fun} code coverage will be collected!")
   else()
-    message(WARNING "${fun} Code Coverage analysis enabled only on the GNU/GCC toolchain!")
+    message(NOTICE "${fun} code coverage analysis enabled only on the GNU/GCC toolchain!")
   endif()
 endfunction()
