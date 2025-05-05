@@ -113,6 +113,7 @@ if(WNDX_SANE_IS_TOP_PROJECT)
         # _sane_base sane_core sane_dev
         # sane_deps sane_src
         sane
+      PHD "include/wndx/sane"
       PATTERNS "*.hpp"
     )
   endif(WNDX_SANE_INSTALL_ENABLE)
