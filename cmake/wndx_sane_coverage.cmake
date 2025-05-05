@@ -5,7 +5,7 @@ function(wndx_sane_coverage) ## args
   cmake_parse_arguments(arg # pfx
     "" # opt
     "TGT_NAME;CLEAN" # ovk
-    "TGT_DEPS;RMGLOB" # mvk
+    "RMGLOB" # mvk
     ${ARGN}
   )
   set(fun "wndx_sane_coverage()")
@@ -32,15 +32,11 @@ function(wndx_sane_coverage) ## args
   if(NOT arg_TGT_NAME MATCHES "^.+$")
     message(FATAL_ERROR "${fun} TGT_NAME not provided!")
   endif()
-  if(NOT arg_TGT_DEPS MATCHES "^.+$")
-    message(FATAL_ERROR "${fun} TGT_DEPS not provided!")
-  endif()
 
   include(wndx_sane_funcs)
   under_compiler(GNU)
   if(${GNU_COMP})
     add_library(${arg_TGT_NAME} INTERFACE)
-    add_dependencies(${arg_TGT_NAME} ${arg_TGT_DEPS})
     ## NOTE: without optimizations
     ## => other optimization levels/options obviously ruin coverage report.
     target_compile_options(${arg_TGT_NAME} INTERFACE -g -O0 --coverage)
