@@ -5,7 +5,7 @@ function(wndx_sane_memcheck) ## args
   cmake_parse_arguments(arg # pfx
     "EXIT_ON_FIRST_ERROR;FORCE_DRMEMORY" # opt
     "TGT_NAME;WORKING_DIRECTORY" # ovk
-    "TGT_DEPS;TGT_EXEC;VALGRIND_OPTS;DRMEMORY_OPTS" # mvk
+    "TGT_EXEC;VALGRIND_OPTS;DRMEMORY_OPTS" # mvk
     ${ARGN}
   )
   set(fun "wndx_sane_memcheck()")
@@ -41,24 +41,30 @@ function(wndx_sane_memcheck) ## args
   if(NOT arg_TGT_EXEC MATCHES "^.+$")
     message(FATAL_ERROR "${fun} TGT_EXEC not provided!")
   endif()
-  if(NOT arg_TGT_DEPS MATCHES "^.+$")
-    message(FATAL_ERROR "${fun} TGT_DEPS not provided!")
-  endif()
 
   if(arg_EXIT_ON_FIRST_ERROR)
     list(APPEND arg_VALGRIND_OPTS "--exit-on-first-error=yes")
   endif()
 
 
-  # get_target_property(output_name ${arg_TGT_DEPS} OUTPUT_NAME)
-  # message(WARNING "output_name: ${output_name}") # XXX
-  # get_target_property(output ${arg_TGT_DEPS} OUTPUT)
-  # message(WARNING "output: ${output}") # XXX
-
+  # split on executable name and trailing arguments if any
+  if(FALSE) # regex way
+    set(exec_re "[A-Za-z0-9_.-]+") # regex match executable name
+    string(REGEX MATCH   "${exec_re}" tgt_exec "${arg_TGT_EXEC}")
+    string(REGEX REPLACE "^[^;]?${exec_re};" "" tgt_opts "${arg_TGT_EXEC}")
+  else() # list way
+    list(POP_FRONT  arg_TGT_EXEC tgt_exec)
+    set (tgt_opts ${arg_TGT_EXEC})
+  endif()
+  message(DEBUG "${fun} TGT_EXEC name: ${tgt_exec}")
+  message(DEBUG "${fun} TGT_EXEC opts: ${tgt_opts}")
+  if(NOT TARGET ${tgt_exec})
+    message(FATAL_ERROR "${fun} TGT_EXEC executable name: '${tgt_exec}' - TARGET not exist!")
+  endif()
 
   list(APPEND CUSTOM_TARGET_OPTS
     WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}"
-    DEPENDS ${arg_TGT_DEPS}
+    DEPENDS ${tgt_exec}
     USES_TERMINAL
     VERBATIM
   )
@@ -73,10 +79,10 @@ function(wndx_sane_memcheck) ## args
       endif()
       add_custom_target(${arg_TGT_NAME}
         COMMAND ${DRMEMORY_COMMAND} ${arg_DRMEMORY_OPTS}
-                        -- ${arg_TGT_EXEC}
+                        -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
         ${CUSTOM_TARGET_OPTS}
       )
-      add_dependencies(${arg_TGT_NAME} ${arg_TGT_DEPS})
+      add_dependencies(${arg_TGT_NAME} ${tgt_exec})
     else()
       message(NOTICE "${fun} SKIP MEMCHECK - not supported on WINDOWS platform!")
       add_custom_target(${arg_TGT_NAME}
@@ -92,10 +98,10 @@ function(wndx_sane_memcheck) ## args
     endif()
     add_custom_target(${arg_TGT_NAME}
       COMMAND export MallocStackLogging=1 && ${LEAKS_COMMAND} --atExit
-                      -- ${arg_TGT_EXEC}
+                      -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
       ${CUSTOM_TARGET_OPTS}
     )
-    add_dependencies(${arg_TGT_NAME} ${arg_TGT_DEPS})
+    add_dependencies(${arg_TGT_NAME} ${tgt_exec})
   else()
     find_program(VALGRIND_COMMAND NAMES valgrind)
     if(NOT VALGRIND_COMMAND)
@@ -106,9 +112,9 @@ function(wndx_sane_memcheck) ## args
     add_custom_target(${arg_TGT_NAME}
       COMMAND ${VALGRIND_COMMAND} --tool=memcheck -s --leak-check=full --show-leak-kinds=all
                       --error-exitcode=73 ${arg_VALGRIND_OPTS}
-                      -- ${arg_TGT_EXEC}
+                      -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
       ${CUSTOM_TARGET_OPTS}
     )
-    add_dependencies(${arg_TGT_NAME} ${arg_TGT_DEPS})
+    add_dependencies(${arg_TGT_NAME} ${tgt_exec})
   endif()
 endfunction()
