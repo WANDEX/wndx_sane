@@ -55,7 +55,7 @@ notify() {
 }
 
 # shellcheck disable=SC2068 # Intentional - to re-split trailing arguments.
-run_ctest() { cmake -E time ctest --output-on-failure --test-dir "$_bdir" $@ ;} # shortcut
+run_ctest() { cmake -E time ctest --output-on-failure --test-dir "$_bdir/$tdir" $@ ;} # shortcut
 
 sep="=============================================================================="
 vsep() { printf "\n%b%.78s%b\n\n" "${2}" "[${1}]${sep}" "${END}" ;}
@@ -72,14 +72,18 @@ prj_name_upper=$(echo "$prj_name" | tr "[:lower:]" "[:upper:]")
 
 
 PRJ_BUILD_TESTS="${BUILD_TESTS:-"${prj_name_upper}_BUILD_TESTS"}"
+tdir="${TESTS_DIR:-"tests/units"}"
 bt="${BUILD_TYPE:-Debug}"
-generator="${GENERATOR:-Ninja}" # "MSYS Makefiles", "Unix Makefiles", Ninja
+generator="${GENERATOR:-Ninja}" # "MSYS Makefiles", "Unix Makefiles", "Ninja Multi-Config", Ninja
 compiler="${CC:-_}"
 verbose="${VERBOSE:-0}"
 deploy="${DEPLOY:-0}"
 rel="${REL:-0}"
 cmbn=$(basename "$compiler") # get compiler basename in case declared via full path
-bdir="build/dev-$bt-$cmbn"
+gen_dir_name=$(echo "$generator" | sed "s/[ |-]/_/g" | tr "[:upper:]" "[:lower:]")
+arch=$(uname -m)
+bdir="build/${gen_dir_name}_${arch}/dev_${cmbn}_${bt}"
+[ -d "$bdir" ] || mkdir -p "$bdir"
 
 
 _verbose=""
@@ -118,7 +122,7 @@ fi
 if [ "$rel" = 1 ]; then
   cd "$bdir" || exit 11
   pwd
-  _sdir="../.."
+  _sdir="../../.."
   _bdir="."
 else
   _sdir="."
@@ -126,14 +130,16 @@ else
 fi
 
 vsep "CONFIGURE" "${BLU}"
+# shellcheck disable=SC2086 # Intentional - to re-split EXTRA CONFIGURE OPTIONS if any
 cmake -E time \
 cmake -S "$_sdir" -B "$_bdir" -G "$generator" -D CMAKE_BUILD_TYPE="${bt}" -D "$PRJ_BUILD_TESTS=${tt}" \
--Wdev -Werror=dev ${fresh} ${cmake_log_level} \
+-Wdev -Werror=dev ${fresh} ${cmake_log_level} ${COPTS} \
 || { notify ERROR "CONFIGURE ERROR" ; exit "$EC" ;}
 
 vsep "BUILD" "${CYN}"
+# shellcheck disable=SC2086 # Intentional - to re-split EXTRA BUILD OPTIONS if any
 cmake -E time \
-cmake --build "$_bdir" --config "${bt}" ${clean_first} ${_verbose} \
+cmake --build "$_bdir" --config "${bt}" ${clean_first} ${_verbose} ${BOPTS} \
 || { notify ERROR "BUILD ERROR" ; exit "$EC" ;}
 
 [ -n "$opt" ] && vsep "TESTS" "${RED}"
