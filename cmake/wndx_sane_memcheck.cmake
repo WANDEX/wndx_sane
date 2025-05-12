@@ -3,9 +3,9 @@ include_guard(GLOBAL)
 
 function(wndx_sane_memcheck) ## args
   cmake_parse_arguments(arg # pfx
-    "EXIT_ON_FIRST_ERROR;FORCE_DRMEMORY" # opt
+    "FORCE_DRMEMORY;EXIT_ON_FIRST_ERROR" # opt
     "TGT_NAME;WORKING_DIRECTORY" # ovk
-    "TGT_EXEC;VALGRIND_OPTS;DRMEMORY_OPTS" # mvk
+    "TGT_EXEC;DRMEMORY_OPTS;LEAKS_OPTS;VALGRIND_OPTS" # mvk
     ${ARGN}
   )
   set(fun "wndx_sane_memcheck()")
@@ -17,15 +17,21 @@ function(wndx_sane_memcheck) ## args
   endif()
 
   ## use default value if not explicitly provided
-  if(NOT arg_VALGRIND_OPTS OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*VALGRIND_OPTS.*")
-    list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "VALGRIND_OPTS")
-    set(arg_VALGRIND_OPTS "")
-  endif()
-
-  ## use default value if not explicitly provided
   if(NOT arg_DRMEMORY_OPTS OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*DRMEMORY_OPTS.*")
     list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "DRMEMORY_OPTS")
     set(arg_DRMEMORY_OPTS "")
+  endif()
+
+  ## use default value if not explicitly provided
+  if(NOT arg_LEAKS_OPTS OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*LEAKS_OPTS.*")
+    list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "LEAKS_OPTS")
+    set(arg_LEAKS_OPTS "")
+  endif()
+
+  ## use default value if not explicitly provided
+  if(NOT arg_VALGRIND_OPTS OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*VALGRIND_OPTS.*")
+    list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "VALGRIND_OPTS")
+    set(arg_VALGRIND_OPTS "")
   endif()
 
   if(arg_UNPARSED_ARGUMENTS)
@@ -42,10 +48,17 @@ function(wndx_sane_memcheck) ## args
     message(FATAL_ERROR "${fun} TGT_EXEC not provided!")
   endif()
 
-  if(arg_EXIT_ON_FIRST_ERROR)
-    list(APPEND arg_VALGRIND_OPTS "--exit-on-first-error=yes")
-  endif()
+  list(PREPEND arg_LEAKS_OPTS
+    -quiet -groupByType -conservative -atExit
+  )
 
+  list(PREPEND arg_VALGRIND_OPTS
+    --tool=memcheck -s --leak-check=full --show-leak-kinds=all --error-exitcode=73
+  )
+
+  if(arg_EXIT_ON_FIRST_ERROR)
+    list(APPEND arg_VALGRIND_OPTS --exit-on-first-error=yes)
+  endif()
 
   # split on executable name and trailing arguments if any
   if(FALSE) # regex way
@@ -70,25 +83,18 @@ function(wndx_sane_memcheck) ## args
   )
 
   if(WIN32 OR arg_FORCE_DRMEMORY)
-    if(TRUE)
-      find_program(DRMEMORY_COMMAND NAMES drmemory)
-      if(NOT DRMEMORY_COMMAND)
-        message(FATAL_ERROR "${fun} drmemory util not found at PATH!")
-      else()
-        message(DEBUG "${fun} drmemory util found at PATH ${DRMEMORY_COMMAND}")
-      endif()
-      add_custom_target(${arg_TGT_NAME}
-        COMMAND ${DRMEMORY_COMMAND} ${arg_DRMEMORY_OPTS}
-                        -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
-        ${CUSTOM_TARGET_OPTS}
-      )
-      add_dependencies(${arg_TGT_NAME} ${tgt_exec})
+    find_program(DRMEMORY_COMMAND NAMES drmemory)
+    if(NOT DRMEMORY_COMMAND)
+      message(FATAL_ERROR "${fun} drmemory util not found at PATH!")
     else()
-      message(NOTICE "${fun} SKIP MEMCHECK - not supported on WINDOWS platform!")
-      add_custom_target(${arg_TGT_NAME}
-        COMMAND echo 'dummy echo instead of --target ${arg_TGT_NAME} call!'
-      )
+      message(DEBUG "${fun} drmemory util found at PATH ${DRMEMORY_COMMAND}")
     endif()
+    add_custom_target(${arg_TGT_NAME}
+      COMMAND ${DRMEMORY_COMMAND} ${arg_DRMEMORY_OPTS}
+        -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
+      ${CUSTOM_TARGET_OPTS}
+    )
+    add_dependencies(${arg_TGT_NAME} ${tgt_exec})
   elseif(APPLE)
     find_program(LEAKS_COMMAND NAMES leaks)
     if(NOT LEAKS_COMMAND)
@@ -96,9 +102,14 @@ function(wndx_sane_memcheck) ## args
     else()
       message(DEBUG "${fun} leaks util found at PATH ${LEAKS_COMMAND}")
     endif()
+    ## override via $ export variable=value
     add_custom_target(${arg_TGT_NAME}
-      COMMAND export MallocStackLogging=1 && ${LEAKS_COMMAND} --atExit
-                      -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
+      COMMAND export
+        MallocScribble=${MallocScribble:-1}
+        MallocStackLogging=${MallocStackLogging:-1}
+        MallocStackLoggingNoCompact=${MallocStackLoggingNoCompact:-1}
+        && ${LEAKS_COMMAND} ${arg_LEAKS_OPTS}
+        -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
       ${CUSTOM_TARGET_OPTS}
     )
     add_dependencies(${arg_TGT_NAME} ${tgt_exec})
@@ -110,9 +121,8 @@ function(wndx_sane_memcheck) ## args
       message(DEBUG "${fun} valgrind util found at PATH ${VALGRIND_COMMAND}")
     endif()
     add_custom_target(${arg_TGT_NAME}
-      COMMAND ${VALGRIND_COMMAND} --tool=memcheck -s --leak-check=full --show-leak-kinds=all
-                      --error-exitcode=73 ${arg_VALGRIND_OPTS}
-                      -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
+      COMMAND ${VALGRIND_COMMAND} ${arg_VALGRIND_OPTS}
+        -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
       ${CUSTOM_TARGET_OPTS}
     )
     add_dependencies(${arg_TGT_NAME} ${tgt_exec})
