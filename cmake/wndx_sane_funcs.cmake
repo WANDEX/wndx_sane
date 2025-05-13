@@ -2,6 +2,24 @@ include_guard(GLOBAL)
 ## cmake module from WANDEX/wndx_sane lib.
 ## useful functions / variable definitions
 
+## append to the list of env vars respecting environment value else set default.
+function(wndx_sane_env_set) ## args
+  cmake_parse_arguments(arg # pfx
+    "" # opt
+    "LIST;DEF_VAL;ENV_VAR" # ovk
+    "" # mvk
+    ${ARGN}
+  )
+  set(fun "wndx_sane_env_set()")
+  if(DEFINED ENV{${arg_ENV_VAR}})
+    list(APPEND ${arg_LIST} "${arg_ENV_VAR}=$ENV{${arg_ENV_VAR}}")
+  else()
+    list(APPEND ${arg_LIST} "${arg_ENV_VAR}=${arg_DEF_VAL}")
+  endif()
+  # message(DEBUG "${fun} ${arg_LIST}")
+  return(PROPAGATE ${arg_LIST})
+endfunction()
+
 function(wndx_sane_path arg_VAR_NAME) ## ARGN
   unset(${arg_VAR_NAME} PARENT_SCOPE) ## unset old variable
   file(REAL_PATH "${CMAKE_CURRENT_SOURCE_DIR}" args)
