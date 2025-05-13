@@ -103,11 +103,15 @@ function(wndx_sane_memcheck) ## args
       message(DEBUG "${fun} leaks util found at PATH ${LEAKS_COMMAND}")
     endif()
     ## override via $ export variable=value
+    ## NOTE: cannot be used MallocScribble=${MallocScribble:-1}
+    ## => Invalid character (':') in a variable name: 'MallocScribble'
+    include(wndx_sane_funcs)
+    set(list_def_env "")
+    wndx_sane_env_set(LIST list_def_env DEF_VAL 1 ENV_VAR MallocScribble)
+    wndx_sane_env_set(LIST list_def_env DEF_VAL 1 ENV_VAR MallocStackLogging)
+    wndx_sane_env_set(LIST list_def_env DEF_VAL 1 ENV_VAR MallocStackLoggingNoCompact)
     add_custom_target(${arg_TGT_NAME}
-      COMMAND export
-        MallocScribble=${MallocScribble:-1}
-        MallocStackLogging=${MallocStackLogging:-1}
-        MallocStackLoggingNoCompact=${MallocStackLoggingNoCompact:-1}
+      COMMAND export ${list_def_env}
         && ${LEAKS_COMMAND} ${arg_LEAKS_OPTS}
         -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
       ${CUSTOM_TARGET_OPTS}
