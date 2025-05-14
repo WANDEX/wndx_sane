@@ -48,6 +48,11 @@ function(wndx_sane_memcheck) ## args
     message(FATAL_ERROR "${fun} TGT_EXEC not provided!")
   endif()
 
+  cmake_path(SET drmemory_logs_dir NORMALIZE "${arg_WORKING_DIRECTORY}/logs/drmemory")
+  list(PREPEND arg_DRMEMORY_OPTS
+    -exit_code_if_errors 73 -logdir "${drmemory_logs_dir}"
+  )
+
   list(PREPEND arg_LEAKS_OPTS
     -quiet -groupByType -conservative
   )
@@ -58,6 +63,7 @@ function(wndx_sane_memcheck) ## args
 
   if(arg_EXIT_ON_FIRST_ERROR)
     list(APPEND arg_VALGRIND_OPTS --exit-on-first-error=yes)
+    list(APPEND arg_DRMEMORY_OPTS -crash_at_error)
   endif()
 
   # split on executable name and trailing arguments if any
@@ -76,7 +82,7 @@ function(wndx_sane_memcheck) ## args
   endif()
 
   list(APPEND CUSTOM_TARGET_OPTS
-    # WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}"
+    WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}"
     DEPENDS ${tgt_exec}
     USES_TERMINAL
     VERBATIM
@@ -89,8 +95,14 @@ function(wndx_sane_memcheck) ## args
     else()
       message(DEBUG "${fun} drmemory util found at PATH ${DRMEMORY_COMMAND}")
     endif()
+    if(MSVC) # XXX call makes the flow of control return to Visual Studio's batch file
+      set(call call) # and hence lets other Custom Build steps run.
+    else()
+      unset(call)
+    endif()
     add_custom_target(${arg_TGT_NAME}
-      COMMAND ${DRMEMORY_COMMAND} ${arg_DRMEMORY_OPTS}
+      COMMAND ${call} ${CMAKE_COMMAND} -E make_directory "${drmemory_logs_dir}"
+        && ${DRMEMORY_COMMAND} ${arg_DRMEMORY_OPTS}
         -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
       ${CUSTOM_TARGET_OPTS}
     )

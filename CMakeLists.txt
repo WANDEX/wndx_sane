@@ -103,7 +103,8 @@ if(WNDX_SANE_IS_TOP_PROJECT)
     wndx_sane_memcheck(TGT_NAME memcheck
       TGT_EXEC tests_units --gtest_brief=1
       # VALGRIND_OPTS --read-var-info=yes --show-leak-kinds=definite --track-origins=yes
-      # EXIT_ON_FIRST_ERROR # valgrind only option
+      # DRMEMORY_OPTS -brief
+      # EXIT_ON_FIRST_ERROR
       # FORCE_DRMEMORY
     )
   endif(WNDX_SANE_MEMCHECK_ENABLE)
