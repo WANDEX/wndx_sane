@@ -49,7 +49,7 @@ function(wndx_sane_memcheck) ## args
   endif()
 
   list(PREPEND arg_LEAKS_OPTS
-    -quiet -groupByType -conservative -atExit
+    -quiet -groupByType -conservative
   )
 
   list(PREPEND arg_VALGRIND_OPTS
@@ -76,7 +76,7 @@ function(wndx_sane_memcheck) ## args
   endif()
 
   list(APPEND CUSTOM_TARGET_OPTS
-    WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}"
+    # WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}"
     DEPENDS ${tgt_exec}
     USES_TERMINAL
     VERBATIM
@@ -96,6 +96,10 @@ function(wndx_sane_memcheck) ## args
     )
     add_dependencies(${arg_TGT_NAME} ${tgt_exec})
   elseif(APPLE)
+    # FIXME: when leak detected leaks utility hangs infinitely in ~50% of cases (CI).
+    # exits with error code properly if generator is Xcode, otherwise hangs! why?
+    # when such issue occurs CI workflow must be manually canceled!
+    ## https://keith.github.io/xcode-man-pages/leaks.1.html
     find_program(LEAKS_COMMAND NAMES leaks)
     if(NOT LEAKS_COMMAND)
       message(FATAL_ERROR "${fun} leaks util not found at PATH!")
@@ -112,7 +116,7 @@ function(wndx_sane_memcheck) ## args
     wndx_sane_env_set(LIST list_def_env DEF_VAL 1 ENV_VAR MallocStackLoggingNoCompact)
     add_custom_target(${arg_TGT_NAME}
       COMMAND export ${list_def_env}
-        && ${LEAKS_COMMAND} ${arg_LEAKS_OPTS}
+        && ${LEAKS_COMMAND} ${arg_LEAKS_OPTS} -atExit
         -- $<TARGET_FILE:${tgt_exec}> ${tgt_opts}
       ${CUSTOM_TARGET_OPTS}
     )
