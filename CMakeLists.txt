@@ -79,6 +79,13 @@ if(WNDX_SANE_IS_TOP_PROJECT)
 
   targets_and_linking()
 
+  if(WNDX_SANE_COVERAGE_ENABLE)
+    include(wndx_sane_coverage)
+    wndx_sane_coverage(TGT_NAME code_coverage
+      CLEAN WNDX_SANE_COVERAGE_CLEAN
+    )
+  endif(WNDX_SANE_COVERAGE_ENABLE)
+
   if(WNDX_SANE_BUILD_TESTS)
     find_package(gtest REQUIRED)
     add_subdirectory(tests/units)
@@ -90,13 +97,6 @@ if(WNDX_SANE_IS_TOP_PROJECT)
       cmake/ include/ scripts/ src/ tests/ CMakeLists.txt LICENSE README.md
     )
   endif(WNDX_SANE_BUILD_PACKAGE)
-
-  if(WNDX_SANE_COVERAGE_ENABLE)
-    include(wndx_sane_coverage)
-    wndx_sane_coverage(TGT_NAME code_coverage TGT_DEPS tests_units
-      CLEAN WNDX_SANE_COVERAGE_CLEAN
-    )
-  endif(WNDX_SANE_COVERAGE_ENABLE)
 
   if(WNDX_SANE_MEMCHECK_ENABLE)
     include(wndx_sane_memcheck)
@@ -121,4 +121,3 @@ if(WNDX_SANE_IS_TOP_PROJECT)
     )
   endif(WNDX_SANE_INSTALL_ENABLE)
 endif(WNDX_SANE_IS_TOP_PROJECT)
-
