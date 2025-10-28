@@ -2,6 +2,9 @@ include_guard(GLOBAL)
 ## cmake module from WANDEX/wndx_sane lib.
 ## useful functions / variable definitions
 
+include(CheckCompilerFlag) # -> check_compiler_flag()
+include(CheckLinkerFlag)   # -> check_linker_flag()
+
 ## append to the list of env vars respecting environment value else set default.
 function(wndx_sane_env_set) ## args
   cmake_parse_arguments(arg # pfx
@@ -85,23 +88,40 @@ function(wndx_sane_include_subdirs arg_dir)
   endforeach(rel_path)
 endfunction(wndx_sane_include_subdirs)
 
-## https://cmake.org/cmake/help/latest/module/CheckCXXCompilerFlag.html
-include(CheckCXXCompilerFlag) # -> check_cxx_compiler_flag()
-
 ## wrapper function with consecutive: check, apply.
 ## receives same arguments as target_compile_options().
-## check_cxx_compiler_flag(), target_compile_options().
+## check_compiler_flag(), target_compile_options().
 function(wndx_sane_tgt_add_check_cxx_compiler_flag) ## args
   set(arg_TARGET ${ARGV0})
   set(arg_SCOPE  ${ARGV1})
   list(SUBLIST ARGV 2 -1 arg_FLAGS) # ARGV leftovers
+  set(lang CXX)
   set(fun "wndx_sane_tgt_add_check_cxx_compiler_flag()")
   foreach(flag ${arg_FLAGS})
-    # message(DEBUG "${fun} ${flag}")
-    check_cxx_compiler_flag(${flag} HAS_${flag})
-    if(HAS_${flag})
-      target_compile_options(${arg_TARGET} ${arg_SCOPE} ${flag})
+    # message(DEBUG "${fun} ${lang} ${flag}")
+    check_compiler_flag(${lang} ${flag} HAS_${lang}_${flag})
+    if(HAS_${lang}_${flag})
+      target_compile_options(${arg_TARGET} ${arg_SCOPE} $<$<COMPILE_LANGUAGE:${lang}>:${flag}>)
     endif()
   endforeach(flag)
 endfunction(wndx_sane_tgt_add_check_cxx_compiler_flag)
+
+## wrapper function with consecutive: check, apply.
+## receives same arguments as target_link_options(), but flags without 'LINKER:'.
+## check_linker_flag(), target_link_options().
+function(wndx_sane_tgt_add_check_cxx_linker_flag) ## args
+  set(arg_TARGET ${ARGV0})
+  set(arg_SCOPE  ${ARGV1})
+  list(SUBLIST ARGV 2 -1 arg_FLAGS) # ARGV leftovers
+  set(lang CXX)
+  set(lnkr LINKER)
+  set(fun "wndx_sane_tgt_add_check_cxx_linker_flag()")
+  foreach(flag ${arg_FLAGS})
+    # message(DEBUG "${fun} ${lang} ${lnkr}:${flag}")
+    check_linker_flag(${lang} ${lnkr}:${flag} HAS_${lang}_${lnkr}_${flag})
+    if(HAS_${lang}_${lnkr}_${flag})
+      target_link_options(${arg_TARGET} ${arg_SCOPE} ${lnkr}:${flag})
+    endif()
+  endforeach(flag)
+endfunction(wndx_sane_tgt_add_check_cxx_linker_flag)
 
