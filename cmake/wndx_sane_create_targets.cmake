@@ -23,10 +23,16 @@ function(wndx_sane_create_targets) ## args
   cmake_parse_arguments(arg # pfx
     "" # opt
     "PFX;LIB;CXX_STD;PHD" # ovk
-    "" # mvk
+    "HFILES" # mvk
     ${ARGN}
   )
   set(fun "wndx_sane_create_targets()")
+
+  ## optional HEADER FILES list
+  if(NOT arg_HFILES OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*HFILES.*")
+    list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "HFILES")
+    unset(arg_HFILES) # unset as arg "" is also not acceptable!
+  endif()
 
   message(DEBUG "${fun} CXX_STD: ${arg_CXX_STD}, PHD: ${arg_PHD}")
 
@@ -48,6 +54,10 @@ function(wndx_sane_create_targets) ## args
     message(WARNING "${fun} CXX_STD not provided => used by default: ${arg_CXX_STD}")
   endif()
 
+  ## default include dir path for PUBLIC HEADERS - common to all properly configured projects.
+  ## => by hard-coding it we enforce proper usage of the header paths relative to default include dir.
+  cmake_path(SET CUR_INC_DIR NORMALIZE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
   ## sanity checks of the user input: PHD
   set(PHD_w_prefix "")
   set(PHD_is_prefix FALSE)
@@ -62,17 +72,29 @@ function(wndx_sane_create_targets) ## args
     message(FATAL_ERROR "${fun} IS NOT A DIR: ${PHD_w_prefix}")
   endif()
 
-  ## default include dir path for PUBLIC HEADERS - common to all properly configured projects.
-  ## => by hard-coding it we enforce proper usage of the header paths relative to default include dir.
-  cmake_path(SET CUR_INC_DIR NORMALIZE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-
   set(WNDX_SANE_HEADERS_LIST "")
-  ## this is currently the only way to gather list of files in a directory
-  file(GLOB_RECURSE wndx_sane_headers LIST_DIRECTORIES false
-    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" # FILE_SET TYPE HEADERS requirement!
-    "${arg_PHD}/*.h" "${arg_PHD}/*.hh" "${arg_PHD}/*.hpp"
-  )
-  list(APPEND WNDX_SANE_HEADERS_LIST ${wndx_sane_headers})
+  if(arg_HFILES) # explicit HEADER FILES list
+    ## RELATIVE_PATH is a FILE_SET TYPE HEADERS requirement!
+    file(RELATIVE_PATH rel_path "${CMAKE_CURRENT_SOURCE_DIR}" "${CUR_INC_DIR}")
+    foreach(hfile ${arg_HFILES})
+      set(hpath "")
+      set(hpath_full "")
+      cmake_path(APPEND hpath "${rel_path}" "${hfile}")
+      cmake_path(APPEND hpath_full "${CMAKE_CURRENT_SOURCE_DIR}" "${hpath}")
+      if(NOT IS_READABLE "${hpath_full}") # well-defined only for explicit full paths
+        message(FATAL_ERROR "${fun} NOT READABLE file: ${hpath_full}")
+      endif()
+      list(APPEND WNDX_SANE_HEADERS_LIST ${hpath})
+      # message(DEBUG "${fun} hfile: ${hfile} | hpath: ${hpath}")
+    endforeach(hfile)
+  else() # generate list of header files
+    ## this is currently the only way to gather list of files in a directory
+    file(GLOB_RECURSE wndx_sane_headers LIST_DIRECTORIES false
+      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" # FILE_SET TYPE HEADERS requirement!
+      "${arg_PHD}/*.h" "${arg_PHD}/*.hh" "${arg_PHD}/*.hpp"
+    )
+    list(APPEND WNDX_SANE_HEADERS_LIST ${wndx_sane_headers})
+  endif()
 
   message(DEBUG "${fun} RELATIVE TO THE CMAKE_CURRENT_SOURCE_DIR LIST OF HEADERS:")
   foreach(fpath ${WNDX_SANE_HEADERS_LIST})
@@ -83,7 +105,7 @@ function(wndx_sane_create_targets) ## args
   add_library(_${arg_LIB}_base INTERFACE)
   target_include_directories(_${arg_LIB}_base INTERFACE
     $<BUILD_INTERFACE:${CUR_INC_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> # XXX
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
   target_compile_features(_${arg_LIB}_base INTERFACE ${arg_CXX_STD})
 
