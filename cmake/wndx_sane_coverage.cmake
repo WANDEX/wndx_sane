@@ -1,6 +1,9 @@
 include_guard(GLOBAL)
 ## cmake module from WANDEX/wndx_sane lib.
 
+## wndx_sane_under_compiler()
+include(wndx_sane_funcs)
+
 function(wndx_sane_coverage) ## args
   cmake_parse_arguments(arg # pfx
     "" # opt
@@ -33,9 +36,10 @@ function(wndx_sane_coverage) ## args
     message(FATAL_ERROR "${fun} TGT_NAME not provided!")
   endif()
 
-  include(wndx_sane_funcs)
-  under_compiler(GNU)
-  if(${GNU_COMP})
+  wndx_sane_under_compiler(GNU)
+  wndx_sane_under_compiler(Clang)
+  wndx_sane_under_compiler(AppleClang)
+  if(GNU_COMP OR Clang_COMP OR AppleClang_COMP)
     add_library(${arg_TGT_NAME} INTERFACE)
     ## NOTE: without optimizations
     ## => other optimization levels/options obviously ruin coverage report.
