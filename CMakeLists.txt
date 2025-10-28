@@ -63,7 +63,6 @@ if(WNDX_SANE_IS_TOP_PROJECT)
   option(WNDX_SANE_COVERAGE_CLEAN   "clean coverage data before taking new"       ON)
   option(WNDX_SANE_INSTALL_ENABLE   "whether or not to enable the install rule"   ON)
   option(WNDX_SANE_MEMCHECK_ENABLE  "detect leaks via memcheck tool"              OFF)
-  option(WNDX_SANE_SNTZ_ADDR        "whether or not to enable address sanitizer"  OFF) # TODO: UNIMPLEMENTED
 
   ## for the list of supported compilers visit:
   ## https://cmake.org/cmake/help/latest/prop_tgt/COMPILE_WARNING_AS_ERROR.html
