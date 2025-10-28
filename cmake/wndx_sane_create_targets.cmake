@@ -1,6 +1,10 @@
 include_guard(GLOBAL)
 ## cmake module from WANDEX/wndx_sane lib.
 
+## wndx_sane_under_compiler()
+## wndx_sane_tgt_add_check_cxx_compiler_flag()
+include(wndx_sane_funcs)
+
 ## -- >> pfx: wndx    name: sane::deps    tgt: sane_deps
 ## -- >> pfx: wndx    name: sane::src     tgt: sane_src
 ## -- >> pfx: wndx    name: sane::core    tgt: sane_core
@@ -134,11 +138,11 @@ function(wndx_sane_create_targets) ## args
   wndx_sane_add_alias(${arg_PFX} ${arg_LIB} ${arg_LIB})
   target_link_libraries(${arg_LIB} INTERFACE ${arg_PFX}::core)
 
-  under_compiler(GNU)
-  under_compiler(Clang)
-  under_compiler(AppleClang)
+  wndx_sane_under_compiler(GNU)
+  wndx_sane_under_compiler(Clang)
+  wndx_sane_under_compiler(AppleClang)
   ## here we set flags/options common to our main target compilers
-  if(${GNU_COMP} OR ${Clang_COMP} OR ${AppleClang_COMP})
+  if(GNU_COMP OR Clang_COMP OR AppleClang_COMP)
 
     if(CMAKE_BUILD_TYPE STREQUAL Release)
       target_compile_options(${arg_LIB}_dev INTERFACE -O3)
@@ -175,74 +179,28 @@ function(wndx_sane_create_targets) ## args
       -fdiagnostics-color=always
       -fdiagnostics-show-template-tree
     )
-
-    ## enable this flags depending on the situation / debugging approach
-    target_compile_options(${arg_LIB}_dev INTERFACE
-      # -Wfatal-errors
-    )
-
-    ## credit: https://gavinchou.github.io/experience/summary/syntax/gcc-address-sanitizer/
-    ## TODO: remove this if clause as it is not finished!
-    if(WNDX_SANE_SNTZ_ADDR)
-      message(NOTICE ">> ${fun} ADDRESS SANITIZER ENABLED")
-      target_compile_options(${arg_LIB}_dev INTERFACE
-        -ggdb -fno-omit-frame-pointer # call stack and line number report format
-        # -fsanitize=address
-        # -static-libstdc++
-      )
-      ## XXX FIXME linker or compile options?
-      ## XXX This command cannot be used to add options for static library targets
-      ## XXX ???
-      target_link_options(${arg_LIB}_dev INTERFACE
-        -ggdb -fno-omit-frame-pointer # call stack and line number report format
-        -fsanitize=address
-        -static-libstdc++
-      )
-      ## platform specific:
-      if(APPLE)
-        target_compile_options(${arg_LIB}_dev INTERFACE
-          -static-libgcc # macos
-        )
-      elseif(UNIX)
-        ## -lrt, needed by linux shared memory operation: shm_open and shm_unlink
-        # target_compile_options(${arg_LIB}_dev INTERFACE
-        # target_link_options(${arg_LIB}_dev INTERFACE
-        #   -static-libasan -lrt # linux
-        # )
-      elseif(WIN32)
-        # FIXME: what to use here...
-        # target_add_check_cxx_compiler_flag(${arg_LIB}_dev /static-libgcc )
-      endif()
-    endif(WNDX_SANE_SNTZ_ADDR)
-
-  endif()
+  endif(GNU_COMP OR Clang_COMP OR AppleClang_COMP)
 
   if(MSVC)
     ## TODO: mimic all other flags from the targeted compilers
     ## (to have equal warnings between compilers and all environments/platforms)
     target_compile_options(${arg_LIB}_dev INTERFACE /W3 /utf-8)
-
+    ## v (flag is obviously missing in MSVC if flag has leading - sign)
   else()
-    ## ^ (flag is obviously missing in MSVC if flag has leading - sign)
     ## Other flags which may miss in any of the targeted compilers.
     ## Not targeted compilers may have support of the GNU/Clang flags
     ## -> so we check support of the following flags, applying only supported.
 
-    ### following flags are missing in Clang
+    ### following flags may or may not be present in the compiler
+    wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE
+      -Warith-conversion
+      -Wstrict-null-sentinel
+      -Wzero-as-null-pointer-constant
+    )
 
-    target_add_check_cxx_compiler_flag(${arg_LIB}_dev -Warith-conversion )
-    target_add_check_cxx_compiler_flag(${arg_LIB}_dev -Wstrict-null-sentinel )
-    target_add_check_cxx_compiler_flag(${arg_LIB}_dev -Wzero-as-null-pointer-constant ) # has
+    ## gives many false positives with GCC 13 -- https://github.com/fmtlib/fmt/issues/3415
+    wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE -Wno-dangling-reference )
 
-    if(${GNU_COMP})
-      ## gives many false positives with GCC 13
-      ## https://github.com/fmtlib/fmt/issues/3415
-      target_add_check_cxx_compiler_flag(${arg_LIB}_dev -Wno-dangling-reference )
-    endif()
-
-    ### section for the other flags (may be or may be missing in Clang)
-    ### for brevity - flags for the other compilers should be here
-
+    ### flags for other compilers should be here
   endif()
-
-endfunction()
+endfunction(wndx_sane_create_targets)
