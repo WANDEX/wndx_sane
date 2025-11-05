@@ -27,7 +27,6 @@ list(APPEND CMAKE_MODULE_PATH
 )
 
 function(targets_and_linking)
-  include(wndx_sane_modules)
   include(wndx_sane_create_targets)
   ## library targets & compilation options/flags
   wndx_sane_create_targets(PFX wndx LIB sane
