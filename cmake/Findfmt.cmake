@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 ## BEG CONF
 set(pkg_name "fmt")
 set(pkg_repo "https://github.com/fmtlib/fmt.git")
-set(pkg_ver "9.1.0")
+set(pkg_ver "12.1.0")
 set(pkg_tag "${pkg_ver}")
 set(pkg_tgt "${pkg_name}::${pkg_name}") ## target
 
