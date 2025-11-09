@@ -200,8 +200,13 @@ function(wndx_sane_create_targets) ## args
     )
 
     set(fdiag_common "")
+    ## if GCC_COLORS set explicitly -> force always, otherwise auto.
+    if(DEFINED ENV{GCC_COLORS} AND NOT "$ENV{GCC_COLORS}" STREQUAL "")
+      list(APPEND fdiag_common -fdiagnostics-color=always) ## HACK: auto does not work within the script etc.
+    else()
+      list(APPEND fdiag_common -fdiagnostics-color=auto)
+    endif()
     list(APPEND fdiag_common
-      -fdiagnostics-color=always # auto unfortunately does not work within the script etc.
       -fdiagnostics-show-template-tree
       -fdiagnostics-show-option
     )
