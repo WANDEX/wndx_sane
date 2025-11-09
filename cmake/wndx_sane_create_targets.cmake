@@ -166,14 +166,16 @@ function(wndx_sane_create_targets) ## args
   ## here we set flags/options common to our main target compilers
   if(GNU_COMP OR Clang_COMP OR AppleClang_COMP)
 
-    if(CMAKE_BUILD_TYPE STREQUAL Release)
+    if(CMAKE_BUILD_TYPE STREQUAL MinSizeRel)
+      target_compile_options(${arg_LIB}_dev INTERFACE -Os)
+    elseif(CMAKE_BUILD_TYPE STREQUAL Release)
       target_compile_options(${arg_LIB}_dev INTERFACE -O3)
+    elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
+      target_compile_options(${arg_LIB}_dev INTERFACE -g -Og)
     elseif(CMAKE_BUILD_TYPE STREQUAL Debug)
       target_compile_options(${arg_LIB}_dev INTERFACE -g -Og)
-
-      ## This helps to see/fix errors (which MSVC will throw anyway)
-      ## => they should be fixed. (it is crucial flag, but has its own cost)
-      target_compile_options(${arg_LIB}_dev INTERFACE -D_GLIBCXX_DEBUG)
+      ## this helps to see/fix errors which MSVC will throw anyway
+      target_compile_options(${arg_LIB}_dev INTERFACE -D_GLIBCXX_DEBUG) # (has its own cost)
     endif()
 
     target_compile_options(${arg_LIB}_dev INTERFACE -Wall -Wextra -Wpedantic -pedantic-errors)
@@ -197,32 +199,56 @@ function(wndx_sane_create_targets) ## args
       -ftrapv
     )
 
-    target_compile_options(${arg_LIB}_dev INTERFACE
-      -fdiagnostics-color=always
+    set(fdiag_common "")
+    list(APPEND fdiag_common
+      -fdiagnostics-color=always # auto unfortunately does not work within the script etc.
       -fdiagnostics-show-template-tree
+      -fdiagnostics-show-option
     )
+    if(GNU_COMP)
+      list(APPEND fdiag_common
+        -fdiagnostics-urls=always
+        -fdiagnostics-generate-patch
+      )
+    elseif(Clang_COMP OR AppleClang_COMP)
+      list(APPEND fdiag_common
+        -fdiagnostics-fixit-info
+      )
+    endif()
+    target_compile_options(${arg_LIB}_dev INTERFACE ${fdiag_common})
+    target_compile_options(${arg_LIB}_deps   PUBLIC ${fdiag_common})
   endif(GNU_COMP OR Clang_COMP OR AppleClang_COMP)
 
   if(MSVC)
-    ## TODO: mimic all other flags from the targeted compilers
+    target_compile_options(${arg_LIB}_dev INTERFACE /MP /utf-8)
+    if(CMAKE_BUILD_TYPE STREQUAL MinSizeRel)
+      target_compile_options(${arg_LIB}_dev INTERFACE /O1si)
+    elseif(CMAKE_BUILD_TYPE STREQUAL Release)
+      target_compile_options(${arg_LIB}_dev INTERFACE /O2ti)
+    elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
+      target_compile_options(${arg_LIB}_dev INTERFACE /Ox /DEBUG /Zi)
+    elseif(CMAKE_BUILD_TYPE STREQUAL Debug)
+      target_compile_options(${arg_LIB}_dev INTERFACE /Od /DEBUG /Zi)
+    endif()
+    ## TODO: MSVC /W3 is a baseline - mimic in other targeted compilers similar warning flags.
     ## (to have equal warnings between compilers and all environments/platforms)
-    target_compile_options(${arg_LIB}_dev INTERFACE /W3 /utf-8)
-    ## v (flag is obviously missing in MSVC if flag has leading - sign)
+    target_compile_options(${arg_LIB}_dev INTERFACE /W3)
+    ## v (flag is obviously missing in MSVC if flag has leading sign: -,--)
   else()
     ## Other flags which may miss in any of the targeted compilers.
     ## Not targeted compilers may have support of the GNU/Clang flags
     ## -> so we check support of the following flags, applying only supported.
 
-    ### following flags may or may not be present in the compiler
+    ## following flags may be or may not be present in the compiler
     wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE
       -Warith-conversion
       -Wstrict-null-sentinel
       -Wzero-as-null-pointer-constant
     )
 
-    ## gives many false positives with GCC 13 -- https://github.com/fmtlib/fmt/issues/3415
-    wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE -Wno-dangling-reference )
+    ## gives many false positives with GCC 13 -- https://github.com/fmtlib/fmt/issues/3415 -- etc.
+    wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE -Wno-dangling-reference)
 
-    ### flags for other compilers should be here
+    ## flags for other compilers should be here
   endif()
 endfunction(wndx_sane_create_targets)
