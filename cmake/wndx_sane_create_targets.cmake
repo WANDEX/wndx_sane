@@ -200,9 +200,14 @@ function(wndx_sane_create_targets) ## args
     )
 
     set(fdiag_common "")
-    ## if GCC_COLORS set explicitly -> force always, otherwise auto.
-    if(DEFINED ENV{GCC_COLORS} AND NOT "$ENV{GCC_COLORS}" STREQUAL "")
-      list(APPEND fdiag_common -fdiagnostics-color=always) ## HACK: auto does not work within the script etc.
+    if(DEFINED ENV{GCC_COLORS} AND
+        NOT "$ENV{GCC_COLORS}" STREQUAL "" AND
+        NOT "$ENV{GCC_COLORS}" STREQUAL "no"
+      ) ## if GCC_COLORS set explicitly -> force always, otherwise auto.
+      list(APPEND fdiag_common
+        -fdiagnostics-color=always ## HACK: auto does not work within the script etc.
+        $<$<BOOL:${GNU_COMP}>:-fdiagnostics-urls=always>
+      )
     else()
       list(APPEND fdiag_common -fdiagnostics-color=auto)
     endif()
@@ -212,7 +217,6 @@ function(wndx_sane_create_targets) ## args
     )
     if(GNU_COMP)
       list(APPEND fdiag_common
-        -fdiagnostics-urls=always
         -fdiagnostics-generate-patch
       )
     elseif(Clang_COMP OR AppleClang_COMP)
