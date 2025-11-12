@@ -18,14 +18,8 @@ namespace fs = std::filesystem; // NOLINT(misc-unused-alias-decls)
 using namespace std::literals;
 
 // alias for shortness & consistency across the project codebase.
-enum class LogLevel; // forward declare
-using LL = LogLevel;
 
-// using s8  = int8_t;
-// using s16 = int16_t;
-// using s32 = int32_t;
-// using s64 = int64_t;
-
+// TODO s8 etc
 using i8  = int8_t;
 using i16 = int16_t;
 using i32 = int32_t;
@@ -41,7 +35,7 @@ using u64 = uint64_t;
 /**
  * In the end of the file after defining project-wide aliases.
  * For the convenience:
- * To not include logger declarations separately in each translation unit.
+ * To not include Logger declarations separately in each translation unit.
  */
-// #include "log.hpp"
+#include "log.hpp"
 

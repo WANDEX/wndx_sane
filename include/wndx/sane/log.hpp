@@ -1,7 +1,7 @@
 #pragma once
 // Logger class common for the both targets: client & daemon
 
-#include "log_level.hpp"
+#include "ll.hpp" // LL enum and its string format specialization
 
 #include "aliases.hpp"
 #include "config.hpp"
@@ -32,24 +32,22 @@ private:
    * for the messages of specific log level (LL:WARN, LL::ERRO, LL:CRIT).
    */
   void trace_to_the_file(
-      char const* const file, int const line, LL const ll);
+      char const* file, int line, LL ll);
 
-  void wrapper_fmt_args_helper(
-      char const* const file, int const line, LL const ll,
-      fmt::string_view const fmt, fmt::format_args const args);
+  void vlog(
+      char const* file, int line, LL ll,
+      fmt::string_view fmt, fmt::format_args args);
 
 public:
-  template <typename... T>
-  void wrapper_fmt_args(
-      const char* const file, int const line, LL const ll,
-      fmt::format_string<T...> const fmt, T&&... args)
+  template <typename... Args>
+  void log(
+      const char* file, int line, LL ll,
+      fmt::format_string<Args...> fmt, Args&&... args)
   {
     if (m_urgency_level > ll) {
       return;
     }
-    wrapper_fmt_args_helper(file, line, ll,
-        fmt::format("[{}]: {}", ll, fmt),
-        fmt::make_format_args(args...));
+    vlog(file, line, ll, fmt, fmt::make_format_args(args...));
   }
 
 public:
@@ -59,13 +57,13 @@ public:
   [[nodiscard]] LL
   get_urgency() noexcept;
 
-  void set_urgency(LL const ll) noexcept;
+  void set_urgency(LL ll) noexcept;
 
   /**
    * @brief specific log message format for the errno.
    * 'https://en.cppreference.com/w/cpp/error/errno'
    */
-  void errnum(int const errnum, std::string_view const msg) noexcept;
+  void errnum(int errnum, std::string_view msg) noexcept;
 
 private:
   fs::path m_log_fpath     { cfg::log_fpath };
@@ -81,7 +79,7 @@ inline Logger log_g {};
 } // namespace wndx
 
 #ifndef WNDX_LOG
-#define WNDX_LOG(log_level, format, ...) \
-wndx::log_g.wrapper_fmt_args(__FILE__, __LINE__, log_level, format, __VA_ARGS__)
+#define WNDX_LOG(LL, ...) \
+wndx::log_g.log(__FILE__, __LINE__, LL, __VA_ARGS__)
 #endif//WNDX_LOG
 

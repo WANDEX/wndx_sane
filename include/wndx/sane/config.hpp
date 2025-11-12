@@ -2,8 +2,6 @@
 
 #include "aliases.hpp"
 
-#include "log_level.hpp"
-
 namespace wndx {
 namespace cfg {
 

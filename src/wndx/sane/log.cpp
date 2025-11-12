@@ -13,7 +13,7 @@
 // toggle showing of the line number : file path
 #ifndef WNDX_LOG_TRACE_TO_THE_FILE
 #define WNDX_LOG_TRACE_TO_THE_FILE 1
-#endif // !WNDX_LOG_TRACE_TO_THE_FILE
+#endif//WNDX_LOG_TRACE_TO_THE_FILE
 
 
 namespace wndx {
@@ -28,7 +28,7 @@ Logger::~Logger() noexcept
 }
 
 void Logger::trace_to_the_file(
-    char const* const file, int const line, LL const ll)
+    char const* file, int line, LL ll)
 {
   if (ll < LL::WARN) {
     return;
@@ -36,16 +36,18 @@ void Logger::trace_to_the_file(
   fmt::print(stderr, "{:>6}: \"{}\"\n", line, file);
 }
 
-void Logger::wrapper_fmt_args_helper(
-    char const* const file, int const line, LL const ll,
-    fmt::string_view const fmt, fmt::format_args const args)
+void Logger::vlog(
+    char const* file, int line, LL ll,
+    fmt::string_view fmt, fmt::format_args args)
 {
-  fmt::vprint(stderr, fmt, args);
+  fmt::print(stderr, "[{}]: {}", ll, fmt::vformat(fmt, args));
   // TODO: also write message into the log file.
   // XXX : maybe use this?
   // https://github.com/PlatformLab/NanoLog
 #if WNDX_LOG_TRACE_TO_THE_FILE
   trace_to_the_file(file, line, ll);
+#else // portable fix: warning: unused parameter [-Wunused-parameter]
+  (void)file; (void)line;
 #endif
 }
 
@@ -61,13 +63,13 @@ Logger::get_urgency() noexcept
   return m_urgency_level;
 }
 
-void Logger::set_urgency(LL const ll) noexcept
+void Logger::set_urgency(LL ll) noexcept
 {
   m_urgency_level = ll;
   WNDX_LOG(LL::NTFY, "forced urgency level = {}\n", ll);
 }
 
-void Logger::errnum(int const errnum, std::string_view const msg) noexcept
+void Logger::errnum(int errnum, std::string_view msg) noexcept
 {
   WNDX_LOG(LL::CRIT, "{}\n\terrno: {}\n", msg, std::strerror(errnum));
 }
