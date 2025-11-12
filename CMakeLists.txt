@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.29..4.1)
 
 ## ^ POLICIES
 project(
   wndx_sane
-  VERSION       0.0.6
+  VERSION       0.0.7
   LANGUAGES     CXX
   DESCRIPTION   "wndx::sane lib - handcrafted CMake modules, modern CMake targets"
   HOMEPAGE_URL  "https://github.com/WANDEX/wndx_sane"
