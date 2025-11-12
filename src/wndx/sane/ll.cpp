@@ -20,8 +20,11 @@ auto fmt::formatter<wndx::LL>::format(wndx::LL ll, format_context& ctx) const
   return formatter<string_view>::format(name, ctx);
 }
 
-// overload for the std::ostream (to print Log Level in the readable text form)
-std::ostream& operator<<(std::ostream& os, wndx::LL ll) {
+#if WNDX_LOG_OSTREAM_SUPPORT
+// overload std::ostream (to output Log Level as text)
+std::ostream& operator<<(std::ostream& os, wndx::LL ll)
+{
   return os << fmt::to_string(ll);
 }
+#endif//WNDX_LOG_OSTREAM_SUPPORT
 

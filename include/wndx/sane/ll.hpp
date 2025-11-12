@@ -3,6 +3,14 @@
 
 #include <fmt/base.h>
 
+#ifndef WNDX_LOG_OSTREAM_SUPPORT
+#define WNDX_LOG_OSTREAM_SUPPORT 1
+#endif//WNDX_LOG_OSTREAM_SUPPORT
+
+#if WNDX_LOG_OSTREAM_SUPPORT
+#include <ostream>
+#endif//WNDX_LOG_OSTREAM_SUPPORT
+
 
 namespace wndx {
 
@@ -30,4 +38,9 @@ fmt::formatter<wndx::LL>: formatter<string_view>
   auto format(wndx::LL ll, format_context& ctx) const
     -> format_context::iterator;
 };
+
+#if WNDX_LOG_OSTREAM_SUPPORT
+// overload std::ostream (to output Log Level as text)
+std::ostream& operator<<(std::ostream& os, wndx::LL ll);
+#endif//WNDX_LOG_OSTREAM_SUPPORT
 
