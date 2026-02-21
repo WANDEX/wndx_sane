@@ -4,13 +4,19 @@ include_guard(GLOBAL)
 function(wndx_sane_install) ## args
   cmake_parse_arguments(arg # pfx
     "" # opt
-    "PHD" # ovk
+    "NAMESPACE;PHD" # ovk
     "TARGETS;PATTERNS" # mvk
     ${ARGN}
   )
   set(fun "wndx_sane_install()")
 
   ## use default value if not explicitly provided
+  if(NOT arg_NAMESPACE OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*NAMESPACE.*")
+    list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "NAMESPACE")
+    set(arg_NAMESPACE "wndx::")
+    message(WARNING "${fun} NAMESPACE not provided => used by default: ${arg_NAMESPACE}")
+  endif()
+
   if(NOT arg_PHD OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*PHD.*")
     list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "PHD")
     cmake_path(APPEND arg_PHD "include" "${PROJECT_NAME}")
@@ -58,10 +64,11 @@ function(wndx_sane_install) ## args
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    BUNDLE  DESTINATION . # macOS bundles are installed directly into CMAKE_INSTALL_PREFIX
   )
 
   install(EXPORT ${PROJECT_NAME}-targets
-    NAMESPACE   wndx::
+    NAMESPACE   "${arg_NAMESPACE}"
     DESTINATION "${install_libdir_cmake}"
   )
 
