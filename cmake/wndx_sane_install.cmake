@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 
 function(wndx_sane_install) ## args
   cmake_parse_arguments(arg # pfx
-    "" # opt
+    "RUNTIME_DEPENDENCIES" # opt
     "NAMESPACE;PHD" # ovk
     "TARGETS;PATTERNS" # mvk
     ${ARGN}
@@ -50,9 +50,16 @@ function(wndx_sane_install) ## args
     message(FATAL_ERROR "${fun} IS NOT A DIR: ${PHD_w_prefix}")
   endif()
 
-  message(STATUS "Generating Install")
+  message(STATUS "${fun} Generating Install")
   include(CMakePackageConfigHelpers)
   include(GNUInstallDirs)
+
+  if(arg_RUNTIME_DEPENDENCIES)
+    include(InstallRequiredSystemLibraries)
+    set(RUNTIME_DEPENDENCIES RUNTIME_DEPENDENCIES)
+  else()
+    unset(RUNTIME_DEPENDENCIES)
+  endif()
 
   set(proj_config "${PROJECT_NAME}-config")
   cmake_path(APPEND cmake_proj_config "cmake" "${proj_config}")
@@ -61,6 +68,7 @@ function(wndx_sane_install) ## args
 
   install(TARGETS ${arg_TARGETS}
     EXPORT ${PROJECT_NAME}-targets
+    ${RUNTIME_DEPENDENCIES} # install minimum required set of libs
     RUNTIME   DESTINATION "${CMAKE_INSTALL_BINDIR}"
     LIBRARY   DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE   DESTINATION "${CMAKE_INSTALL_LIBDIR}"
