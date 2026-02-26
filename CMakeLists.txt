@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.29..4.1)
 
+## Disable modules support, this is broken with clang-tidy at the moment
+## ref: github.com/cpp-best-practices/cmake_template/blob/main/CMakeLists.txt
+cmake_policy(SET CMP0155 OLD)
+
 ## ^ POLICIES
 project(
   wndx_sane
@@ -9,8 +13,10 @@ project(
   HOMEPAGE_URL  "https://github.com/WANDEX/wndx_sane"
 )
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(WNDX_SANE_DISABLE_TOP_PROJECT OFF)
@@ -67,7 +73,7 @@ option(WNDX_SANE_MEMCHECK_ENABLE  "detect leaks via memcheck tool"              
 
 ## for the list of supported compilers visit:
 ## https://cmake.org/cmake/help/latest/prop_tgt/COMPILE_WARNING_AS_ERROR.html
-option(CMAKE_COMPILE_WARNING_AS_ERROR "treat compilation warnings as errors"  OFF)
+option(CMAKE_COMPILE_WARNING_AS_ERROR "treat compilation warnings as errors" OFF)
 
 ## output dir is correct by default for most build setups.
 ## however, when building lib as a DLL, it is important to have the DLL in the same dir
