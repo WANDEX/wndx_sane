@@ -160,6 +160,14 @@ function(wndx_sane_create_targets) ## args
   wndx_sane_add_alias(${arg_PFX} ${arg_LIB} ${arg_LIB})
   target_link_libraries(${arg_LIB} INTERFACE ${arg_PFX}::core)
 
+  set(fac_clr auto) ## force always/auto color
+  if(DEFINED ENV{GCC_COLORS} AND
+      NOT "$ENV{GCC_COLORS}" STREQUAL "" AND
+      NOT "$ENV{GCC_COLORS}" STREQUAL "no"
+    ) ## if GCC_COLORS set explicitly -> force always, otherwise auto.
+    set(fac_clr always) ## HACK: auto does not work within the script etc.
+  endif()
+
   wndx_sane_under_compiler(GNU)
   wndx_sane_under_compiler(Clang)
   wndx_sane_under_compiler(AppleClang)
@@ -200,17 +208,10 @@ function(wndx_sane_create_targets) ## args
     )
 
     set(fdiag_common "")
-    if(DEFINED ENV{GCC_COLORS} AND
-        NOT "$ENV{GCC_COLORS}" STREQUAL "" AND
-        NOT "$ENV{GCC_COLORS}" STREQUAL "no"
-      ) ## if GCC_COLORS set explicitly -> force always, otherwise auto.
-      list(APPEND fdiag_common
-        -fdiagnostics-color=always ## HACK: auto does not work within the script etc.
-        $<$<BOOL:${GNU_COMP}>:-fdiagnostics-urls=always>
-      )
-    else()
-      list(APPEND fdiag_common -fdiagnostics-color=auto)
-    endif()
+    list(APPEND fdiag_common
+      -fdiagnostics-color=${fac_clr}
+      $<$<BOOL:${GNU_COMP}>:-fdiagnostics-urls=${fac_clr}>
+    )
     list(APPEND fdiag_common
       -fdiagnostics-show-template-tree
       -fdiagnostics-show-option
@@ -253,10 +254,18 @@ function(wndx_sane_create_targets) ## args
       -Warith-conversion
       -Wstrict-null-sentinel
       -Wzero-as-null-pointer-constant
+      -Wdeprecated-declarations
     )
 
-    ## gives many false positives with GCC 13 -- https://github.com/fmtlib/fmt/issues/3415 -- etc.
-    wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE -Wno-dangling-reference)
+    ## gives many false positives with GCC 13, etc
+    ## https://github.com/fmtlib/fmt/issues/3415
+    wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE
+      -Wno-dangling-reference
+    )
+
+    wndx_sane_tgt_add_check_cxx_linker_flag(${arg_LIB}_dev INTERFACE
+      --color-diagnostics=${fac_clr}
+    ) ## e.g. mold linker etc.
 
     ## flags for other compilers should be here
   endif()
