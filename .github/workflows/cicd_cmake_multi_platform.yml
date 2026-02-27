@@ -44,6 +44,9 @@ jobs:
           - "mac_gcc"
           - "mac_clang"
           - "mac_Xcode"
+          - "win11_clang"
+          - "win11_cl"
+          - "win10_cl"
         include:
           - name: "ubuntu gcc"
             bp : "lnx_gcc"
@@ -75,6 +78,24 @@ jobs:
             cc : cc
             cxx: c++
             gen: "Xcode"
+          - name: "win11 clang"
+            bp : "win11_clang"
+            pl : windows-latest
+            cc : clang
+            cxx: clang++
+            gen: "Ninja"
+          - name: "win11 MSVC"
+            bp : "win11_cl"
+            pl : windows-latest
+            cc : cl
+            cxx: cl
+            gen: "Visual Studio 17 2022"
+          - name: "win10 MSVC"
+            bp : "win10_cl"
+            pl : windows-2022
+            cc : cl
+            cxx: cl
+            gen: "Visual Studio 17 2022"
         ## END include
       ## END matrix
     ## END strategy
@@ -98,6 +119,7 @@ jobs:
         echo "date_time=$(date +%y-%m-%d_%H-%M-%S)" >> "$GITHUB_OUTPUT"
         echo "dir_path_prj=${{ github.workspace }}" >> "$GITHUB_OUTPUT"
         echo "dir_name_build=build_${{ env.PRJ_NAME }}_${{ matrix.bp }}_${{ matrix.bt }}" >> "$GITHUB_OUTPUT"
+        echo "dir_cache_local=${{ github.workspace }}/.local" >> "$GITHUB_OUTPUT"
     - name: set reusable str2
       id   : str2
       shell: bash
@@ -128,6 +150,12 @@ jobs:
         cmake -E make_directory "${{ steps.str2.outputs.dir_path_build }}"
         cmake -E make_directory "${{ steps.str3.outputs.dir_path_env }}"
         cmake -E make_directory "${{ steps.str3.outputs.dir_path_deploy }}"
+        cmake -E make_directory "${{ steps.str1.outputs.dir_cache_local }}"
+        cmake -E make_directory "${{ steps.str1.outputs.dir_cache_local }}/bin"
+        cmake -E make_directory "${{ steps.str1.outputs.dir_cache_local }}/lib"
+        echo "${{ steps.str1.outputs.dir_cache_local }}/bin" >> "$GITHUB_PATH"
+        cmake -E touch "${{ steps.str1.outputs.dir_cache_local }}/.DS_Store"
+      ## ^ create empty file .DS_Store to make sure that step "Post cache local" will work!
 
     - name: ENV List All bef
       working-directory: ${{ steps.str3.outputs.dir_path_env }}
@@ -150,6 +178,86 @@ jobs:
 
     - name: ninja --version
       run : ninja --version
+
+    - name: cache local
+      id  : cache_local
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ steps.str1.outputs.dir_cache_local }}
+        key : ${{ runner.os }}-local-${{ steps.str1.outputs.date }}
+
+      ## https://github.com/marketplace/actions/install-winget
+    - name: get/install winget
+      if  : ${{ runner.os == 'Windows' && matrix.pl == 'windows-2022' }}
+      uses: Cyberboss/install-winget@v1
+
+      ## https://github.com/microsoft/winget-cli/issues/2879#issuecomment-1411114420
+      ## $ winget settings --enable BypassCertificatePinningForMicrosoftStore
+      ## $ winget settings export
+      ## winget upgrade winget --accept-package-agreements --disable-interactivity --accept-source-agreements
+    - name: get/install WingetPathUpdater
+      if  : ${{ runner.os == 'Windows' }}
+      working-directory: ${{ github.workspace }}
+      run : |
+        winget settings --enable BypassCertificatePinningForMicrosoftStore || true
+        winget settings export || true
+        winget install jazzdelightsme.WingetPathUpdater --disable-interactivity --accept-source-agreements || true
+
+    - name: install drmemory
+      if  : ${{ runner.os == 'Windows' }}
+      working-directory: ${{ github.workspace }}
+      run : |
+        DRMEMORY_V=2.6.20185
+        DRMEMORY_DN=DrMemory-Windows-$DRMEMORY_V
+        DRMEMORY_ID=DynamoRIO.drmemory
+        MS_WG_DIR="/c/Users/runneradmin/AppData/Local/Microsoft/WinGet"
+        MS_WG_SRC=_Microsoft.Winget.Source_
+        MS_PUB_ID=8wekyb3d8bbwe
+        winget install --id=$DRMEMORY_ID -v $DRMEMORY_V -e --disable-interactivity --accept-source-agreements
+        echo ";${MS_WG_DIR}/Packages/${DRMEMORY_ID}${MS_WG_SRC}${MS_PUB_ID}/${DRMEMORY_DN}/bin64" >> "$GITHUB_PATH"
+
+    ## occupies to much space in cache - 434 Mb. Whole dir must be cached, not only bin64 - exe require parent dirs!
+    # - name: get/install drmemory
+    #   if  : ${{ runner.os == 'Windows' && steps.cache_local.outputs.cache-hit != 'true' }}
+    #   working-directory: ${{ github.workspace }}
+    #   run : |
+    #     URL_BASE="https://github.com/DynamoRIO/drmemory/releases/download/release_2.6.0"
+    #     DRMEMORY=DrMemory-Windows-2.6.0
+    #     curl -sSLO "$URL_BASE/$DRMEMORY.zip"
+    #     cmake -E tar -xzf $DRMEMORY.zip
+    #     cmake -E copy_directory $DRMEMORY "${{ steps.str1.outputs.dir_cache_local }}"
+
+    ## install libc6-dbg and/or use previously installed files from cache.
+    ## LD_LIBRARY_PATH cannot be set in github workflow, thus manual copy to the system lib dir.
+    ## update -> https://github.com/actions/runner/issues/3720
+    - name: get/install valgrind deps
+      if  : ${{ runner.os == 'Linux' }}
+      working-directory: ${{ github.workspace }}
+      run : |
+        lib_debug_usr="/usr/lib/debug"
+        lib_debug_lcl="${{ steps.str1.outputs.dir_cache_local }}/lib/debug"
+        if [ ! -d "$lib_debug_usr" ] && [ ! -d "$lib_debug_lcl" ]; then
+          sudo apt-get update
+          sudo apt-get install libc6-dbg
+        fi
+        if [   -d "$lib_debug_usr" ] && [ ! -d "$lib_debug_lcl" ]; then
+          echo "> copy   to the local cache"
+          sudo cp -r "$lib_debug_usr" "$lib_debug_lcl"
+        else
+          echo "> copy from the local cache"
+          sudo cp -r "$lib_debug_lcl" "$lib_debug_usr"
+        fi
+
+    - name: get/install valgrind
+      if  : ${{ runner.os == 'Linux' && steps.cache_local.outputs.cache-hit != 'true' }}
+      working-directory: ${{ github.workspace }}
+      run : |
+        VALGRIND=valgrind-3.25.0
+        curl -sSLO "https://sourceware.org/pub/valgrind/$VALGRIND.tar.bz2"
+        cmake -E tar -xjf $VALGRIND.tar.bz2 && cd $VALGRIND
+        ./configure --prefix "${{ steps.str1.outputs.dir_cache_local }}"
+        make -j $(getconf _NPROCESSORS_ONLN) && make install
 
     - name: ENV List All post diff
       working-directory: ${{ steps.str3.outputs.dir_path_env }}
@@ -189,7 +297,7 @@ jobs:
 
       ## drmemory currently not works on windows-latest/windows-2025 => Dr. Memory internal crash at PC 0x*.
     - name: Memcheck
-      if  : ${{ false && matrix.bt == 'Debug' && matrix.pl != 'windows-latest' }}
+      if  : ${{ matrix.bt == 'Debug' && matrix.pl != 'windows-latest' }}
       working-directory: ${{ steps.str2.outputs.dir_path_build }}
       run : cmake --build . --config ${{ matrix.bt }} --target memcheck
 
@@ -264,8 +372,9 @@ jobs:
       uses : softprops/action-gh-release@v2
       if   : ${{ github.ref_type == 'tag' && matrix.bt == 'Release' }}
       with :
-        body : ${{ steps.git.outputs.annotation }}
         generate_release_notes: true
+        append_body: true
+        body : ${{ steps.git.outputs.annotation }}
         draft: false
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
