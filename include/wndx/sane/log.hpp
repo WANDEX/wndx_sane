@@ -60,7 +60,6 @@ public:
 
   /**
    * @brief specific log message format for the errno.
-   * 'https://en.cppreference.com/w/cpp/error/errno'
    */
   static void errnum(int errnum, std::string_view msg) noexcept;
 

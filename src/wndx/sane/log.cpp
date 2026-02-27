@@ -7,7 +7,6 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 
-#include <cstring>              // for errno messages std::strerror
 #include <utility>
 
 
@@ -15,6 +14,10 @@
 #ifndef WNDX_LOG_TRACE_TO_THE_FILE
 #define WNDX_LOG_TRACE_TO_THE_FILE 1
 #endif//WNDX_LOG_TRACE_TO_THE_FILE
+
+#ifndef WNDX_LOG_INLINE_BUFFER_SIZE
+#define WNDX_LOG_INLINE_BUFFER_SIZE 250
+#endif//WNDX_LOG_INLINE_BUFFER_SIZE
 
 
 namespace wndx {
@@ -66,9 +69,20 @@ void Logger::set_urgency(LL ll) noexcept
   WNDX_LOG(LL::NTFY, "forced urgency level = {}\n", ll);
 }
 
+/**
+ * @brief cross-platform, thread-safe alternative to the std::strerror.
+ */
+[[nodiscard]] auto static
+strerror(int errnum) noexcept
+{
+  fmt::basic_memory_buffer<char, WNDX_LOG_INLINE_BUFFER_SIZE> obuf;
+  fmt::format_system_error(obuf, errnum, "");
+  return fmt::to_string(obuf);
+}
+
 void Logger::errnum(int errnum, std::string_view msg) noexcept
 {
-  WNDX_LOG(LL::CRIT, "{}\n\terrno: {}\n", msg, std::strerror(errnum));
+  WNDX_LOG(LL::CRIT, "{}\n\terrno: {}\n", msg, strerror(errnum));
 }
 
 } // namespace wndx
