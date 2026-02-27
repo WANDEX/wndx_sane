@@ -1,9 +1,8 @@
 #pragma once
 
-#include "aliases.hpp"
+#include "aliases.hpp"          // IWYU pragma: keep
 
-namespace wndx {
-namespace cfg {
+namespace wndx::cfg {
 
 // log urgency level
 // inline static constexpr LL urgency{ LL::NTFY }; // default for the basic users
@@ -15,6 +14,5 @@ inline static constexpr std::string_view log_fpath{ "/tmp/wndx/logs/default.log"
 // default (client UID / device MAC) unique to the client/device.
 inline static constexpr std::string_view def_uid{ "f000::f000:f000:f000:f000" };
 
-} // namespace cfg
-} // namespace wndx
+} // namespace wndx::cfg
 

@@ -2,12 +2,13 @@
 
 #include "wndx/sane/log.hpp"
 
-#include "wndx/sane/aliases.hpp"
+#include "wndx/sane/aliases.hpp" // IWYU pragma: keep
 
 #include <fmt/core.h>
 #include <fmt/format.h>
 
-#include <cerrno>               // for errno messages std::strerror
+#include <cstring>              // for errno messages std::strerror
+#include <utility>
 
 
 // toggle showing of the line number : file path
@@ -18,12 +19,8 @@
 
 namespace wndx {
 
-Logger::Logger(fs::path const& log_fpath) noexcept
-  : m_log_fpath{ log_fpath }
-{
-}
-
-Logger::~Logger() noexcept
+Logger::Logger(fs::path log_fpath) noexcept
+  : m_log_fpath{ std::move(log_fpath) }
 {
 }
 

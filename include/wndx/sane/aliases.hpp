@@ -3,14 +3,14 @@
 
 #include <cstdint>              // types, MIN/MAX, etc
 
-#include <filesystem>
+#include <filesystem>           // IWYU pragma: keep | fs
 #include <string_view>
 
 namespace wndx {
 
 // @brief wrapper for forced computation at compile time.
 // the destructor of the type used in the function must be constexpr.
-inline consteval auto cmpl_time(auto value) { return value; }
+consteval auto cmpl_time(auto value) { return value; }
 
 namespace fs = std::filesystem; // NOLINT(misc-unused-alias-decls)
 
@@ -39,5 +39,5 @@ using sz_t = std::size_t;
  * For the convenience:
  * To not include Logger declarations separately in each translation unit.
  */
-#include "log.hpp"
+#include "log.hpp"              // IWYU pragma: keep
 

@@ -3,7 +3,7 @@
 
 #include "ll.hpp" // LL enum and its string format specialization
 
-#include "aliases.hpp"
+#include "aliases.hpp"          // IWYU pragma: keep
 #include "config.hpp"
 
 #include <fmt/core.h>
@@ -22,19 +22,19 @@ public:
   Logger(const Logger &) = default;
   Logger &operator=(Logger &&) = default;
   Logger &operator=(const Logger &) = default;
-  ~Logger() noexcept;
+  ~Logger() noexcept = default;
 
-  explicit Logger(fs::path const& log_fpath) noexcept;
+  explicit Logger(fs::path const log_fpath) noexcept;
 
 private:
   /**
    * @brief trace with message content - line: file.
    * for the messages of specific log level (LL:WARN, LL::ERRO, LL:CRIT).
    */
-  void trace_to_the_file(
+  static void trace_to_the_file(
       char const* file, int line, LL ll);
 
-  void vlog(
+  static void vlog(
       char const* file, int line, LL ll,
       fmt::string_view fmt, fmt::format_args args);
 
@@ -50,7 +50,6 @@ public:
     vlog(file, line, ll, fmt, fmt::make_format_args(args...));
   }
 
-public:
   [[nodiscard]] fs::path
   get_log_fpath() noexcept;
 
@@ -63,7 +62,7 @@ public:
    * @brief specific log message format for the errno.
    * 'https://en.cppreference.com/w/cpp/error/errno'
    */
-  void errnum(int errnum, std::string_view msg) noexcept;
+  static void errnum(int errnum, std::string_view msg) noexcept;
 
 private:
   fs::path m_log_fpath     { cfg::log_fpath };
@@ -78,8 +77,10 @@ inline Logger log_g {};
 
 } // namespace wndx
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #ifndef WNDX_LOG
 #define WNDX_LOG(LL, ...) \
 wndx::log_g.log(__FILE__, __LINE__, LL, __VA_ARGS__)
 #endif//WNDX_LOG
+// NOLINTEND(cppcoreguidelines-macro-usage)
 

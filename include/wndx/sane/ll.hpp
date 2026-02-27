@@ -16,7 +16,7 @@ namespace wndx {
 
 // Log Level - log msg have Log Level.
 // The higher the level, the fewer messages.
-enum class LL
+enum class LL // NOLINT(performance-enum-size)
 {
   DBUG = 1, // DEBUG
   INFO,     // INFO
