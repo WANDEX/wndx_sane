@@ -229,6 +229,14 @@ function(wndx_sane_create_targets) ## args
     target_compile_options(${arg_LIB}_deps   PUBLIC ${fdiag_common})
   endif(GNU_COMP OR Clang_COMP OR AppleClang_COMP)
 
+  if(DEFINED CMAKE_LINKER_TYPE)
+    if(CMAKE_LINKER_TYPE STREQUAL MOLD)
+      target_link_options(${arg_LIB}_dev INTERFACE
+        LINKER:--color-diagnostics=${fac_clr}
+      )
+    endif()
+  endif()
+
   if(MSVC)
     target_compile_options(${arg_LIB}_dev INTERFACE /MP /utf-8)
     if(CMAKE_BUILD_TYPE STREQUAL MinSizeRel)
@@ -262,10 +270,6 @@ function(wndx_sane_create_targets) ## args
     wndx_sane_tgt_add_check_cxx_compiler_flag(${arg_LIB}_dev INTERFACE
       -Wno-dangling-reference
     )
-
-    wndx_sane_tgt_add_check_cxx_linker_flag(${arg_LIB}_dev INTERFACE
-      --color-diagnostics=${fac_clr}
-    ) ## e.g. mold linker etc.
 
     ## flags for other compilers should be here
   endif()
