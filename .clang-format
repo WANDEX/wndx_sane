@@ -1,17 +1,60 @@
+## AUTHOR: WANDEX
+## https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+## https://llvm.org/docs/CodingStandards.html
+## https://google.github.io/styleguide/cppguide.html
 ---
 BasedOnStyle: LLVM
 
 Language: Cpp
 Standard: c++20
 
+IncludeBlocks: Preserve
+SortIncludes: true
+
 AllowShortFunctionsOnASingleLine: InlineOnly
-IndentCaseLabels: true
-IndentWidth: 2
-PPIndentWidth: 2
-IndentPPDirectives: AfterHash
-ColumnLimit: 120
-InsertNewlineAtEOF: true
-AlwaysBreakTemplateDeclarations: Yes
-MaxEmptyLinesToKeep: 2
 BreakBeforeBraces: Linux
+BreakConstructorInitializers: BeforeComma
+BreakTemplateDeclarations: Yes
+ColumnLimit: 80
+FixNamespaceComments: true
+IndentCaseLabels: false
+IndentPPDirectives: AfterHash
+IndentRequiresClause: false
+IndentWidth: 2
+InsertNewlineAtEOF: true
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: None
+PPIndentWidth: 0
 PackConstructorInitializers: Never
+PointerAlignment: Left
+QualifierAlignment: Custom
+QualifierOrder: [friend, inline, static, constexpr, volatile, restrict, type, const]
+ReflowComments: Always
+SkipMacroDefinitionBody: true
+WrapNamespaceBodyWithEmptyLines: Always
+
+## === ALIGN OPTIONS BEG === ##
+AlignArrayOfStructures: Left
+# AlignConsecutiveAssignments:  Consecutive
+AlignConsecutiveBitFields:    Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros:       Consecutive
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCaseColons: true
+AlignEscapedNewlines: Right
+AlignOperands: AlignAfterOperator
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 1
+## === ALIGN OPTIONS END === ##
+
+## clang-format 22
+# NumericLiteralCase:
+#   ExponentLetter: Lower
+#   HexDigit: Upper
+#   Prefix: Lower
+#   Suffix: Lower
+
