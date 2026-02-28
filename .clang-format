@@ -33,10 +33,10 @@ WrapNamespaceBodyWithEmptyLines: Always
 
 AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortFunctionsOnASingleLine: All
 
 AlignArrayOfStructures: Left
-# AlignConsecutiveAssignments:  Consecutive
+AlignConsecutiveAssignments:  Consecutive
 AlignConsecutiveBitFields:    Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignConsecutiveMacros:       Consecutive
