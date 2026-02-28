@@ -17,11 +17,11 @@ namespace wndx {
 class Logger final
 {
 public:
-  Logger() = default;
-  Logger(Logger &&) = default;
-  Logger(const Logger &) = default;
-  Logger &operator=(Logger &&) = default;
-  Logger &operator=(const Logger &) = default;
+  Logger() noexcept = default;
+  Logger(Logger &&) noexcept = default;
+  Logger(const Logger &) noexcept = default;
+  Logger &operator=(Logger &&) noexcept = default;
+  Logger &operator=(const Logger &) noexcept = default;
   ~Logger() noexcept = default;
 
   explicit Logger(fs::path const log_fpath) noexcept;
@@ -42,7 +42,7 @@ public:
   template <typename... Args>
   void log(
       const char* file, int line, LL ll,
-      fmt::format_string<Args...> fmt, Args&&... args)
+      fmt::format_string<Args...> fmt, Args&&... args) // NOLINT(*-forward)
   {
     if (m_urgency_level > ll) {
       return;
@@ -69,10 +69,10 @@ private:
 };
 
 /**
- * defined here for convenience => be able to use it in other files/functions ->
- * without the need to pass it into every single function as the extra argument.
+ * defined here for convenience => be able to use it in other files/functions,
+ * without the need to pass into every single function as the extra argument
  * (usually logger is needed for the whole life of the program anyway!) */
-inline Logger log_g {};
+inline Logger log_g {}; // NOLINT(*-avoid-non-const-global-variables)
 
 } // namespace wndx
 
