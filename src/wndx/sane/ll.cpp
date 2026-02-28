@@ -5,7 +5,7 @@
 
 
 auto fmt::formatter<wndx::LL>::format(wndx::LL ll, format_context& ctx) const
-  -> format_context::iterator
+    -> format_context::iterator
 {
   string_view name = "unknown";
   switch (ll) {
@@ -26,5 +26,4 @@ std::ostream& operator<<(std::ostream& os, wndx::LL ll)
 {
   return os << fmt::to_string(ll);
 }
-#endif//WNDX_LOG_OSTREAM_SUPPORT
-
+#endif // WNDX_LOG_OSTREAM_SUPPORT

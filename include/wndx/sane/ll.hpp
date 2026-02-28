@@ -3,13 +3,15 @@
 
 #include <fmt/base.h>
 
+// clang-format off
 #ifndef WNDX_LOG_OSTREAM_SUPPORT
 #define WNDX_LOG_OSTREAM_SUPPORT 1
 #endif//WNDX_LOG_OSTREAM_SUPPORT
 
-#if WNDX_LOG_OSTREAM_SUPPORT
+#if     WNDX_LOG_OSTREAM_SUPPORT
 #include <ostream>
 #endif//WNDX_LOG_OSTREAM_SUPPORT
+// clang-format on
 
 
 namespace wndx {
@@ -18,13 +20,13 @@ namespace wndx {
 // The higher the level, the fewer messages.
 enum class LL // NOLINT(performance-enum-size)
 {
-  DBUG = 1, // DEBUG
-  INFO,     // INFO
-  STAT,     // STATUS
-  NTFY,     // NOTIFY
-  WARN,     // WARNING
-  ERRO,     // ERROR
-  CRIT,     // CRITICAL
+  DBUG = 1,   // DEBUG
+  INFO,       // INFO
+  STAT,       // STATUS
+  NTFY,       // NOTIFY
+  WARN,       // WARNING
+  ERRO,       // ERROR
+  CRIT,       // CRITICAL
 };
 
 } // namespace wndx
@@ -32,15 +34,14 @@ enum class LL // NOLINT(performance-enum-size)
 // NOTE: fmt demands to specialize/declare this here!
 // [template_spec_redecl_out_of_scope].
 // @brief format enum log levels in the readable text form.
-template <> struct
-fmt::formatter<wndx::LL>: formatter<string_view>
-{ // parse is inherited from formatter<string_view>.
+template <>
+struct fmt::formatter<wndx::LL> : formatter<string_view>
+{
   auto format(wndx::LL ll, format_context& ctx) const
-    -> format_context::iterator;
+      -> format_context::iterator;
 };
 
 #if WNDX_LOG_OSTREAM_SUPPORT
 // overload std::ostream (to output Log Level as text)
 std::ostream& operator<<(std::ostream& os, wndx::LL ll);
-#endif//WNDX_LOG_OSTREAM_SUPPORT
-
+#endif // WNDX_LOG_OSTREAM_SUPPORT

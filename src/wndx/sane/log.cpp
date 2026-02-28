@@ -10,6 +10,7 @@
 #include <utility>
 
 
+// clang-format off
 // toggle showing of the line number : file path
 #ifndef WNDX_LOG_TRACE_TO_THE_FILE
 #define WNDX_LOG_TRACE_TO_THE_FILE 1
@@ -18,17 +19,17 @@
 #ifndef WNDX_LOG_INLINE_BUFFER_SIZE
 #define WNDX_LOG_INLINE_BUFFER_SIZE 250
 #endif//WNDX_LOG_INLINE_BUFFER_SIZE
+// clang-format on
 
 
 namespace wndx {
 
 Logger::Logger(fs::path log_fpath) noexcept
-  : m_log_fpath{ std::move(log_fpath) }
+    : m_log_fpath{ std::move(log_fpath) }
 {
 }
 
-void Logger::trace_to_the_file(
-    char const* file, int line, LL ll)
+void Logger::trace_to_the_file(char const* file, int line, LL ll)
 {
   if (ll < LL::WARN) {
     return;
@@ -36,9 +37,8 @@ void Logger::trace_to_the_file(
   fmt::print(stderr, "{:>6}: \"{}\"\n", line, file);
 }
 
-void Logger::vlog(
-    char const* file, int line, LL ll,
-    fmt::string_view fmt, fmt::format_args args)
+void Logger::vlog(char const* file, int line, LL ll, fmt::string_view fmt,
+                  fmt::format_args args)
 {
   fmt::print(stderr, "[{}]: {}", ll, fmt::vformat(fmt, args));
   // TODO: also write message into the log file.
@@ -47,21 +47,14 @@ void Logger::vlog(
 #if WNDX_LOG_TRACE_TO_THE_FILE
   trace_to_the_file(file, line, ll);
 #else // portable fix: warning: unused parameter [-Wunused-parameter]
-  (void)file; (void)line;
+  (void)file;
+  (void)line;
 #endif
 }
 
-[[nodiscard]] fs::path
-Logger::get_log_fpath() noexcept
-{
-  return m_log_fpath;
-}
+[[nodiscard]] fs::path Logger::get_log_fpath() noexcept { return m_log_fpath; }
 
-[[nodiscard]] LL
-Logger::get_urgency() noexcept
-{
-  return m_urgency_level;
-}
+[[nodiscard]] LL Logger::get_urgency() noexcept { return m_urgency_level; }
 
 void Logger::set_urgency(LL ll) noexcept
 {
@@ -72,8 +65,7 @@ void Logger::set_urgency(LL ll) noexcept
 /**
  * @brief cross-platform, thread-safe alternative to the std::strerror.
  */
-[[nodiscard]] auto static
-strerror(int errnum) noexcept
+[[nodiscard]] static auto strerror(int errnum) noexcept
 {
   fmt::basic_memory_buffer<char, WNDX_LOG_INLINE_BUFFER_SIZE> obuf;
   fmt::format_system_error(obuf, errnum, "");
@@ -86,4 +78,3 @@ void Logger::errnum(int errnum, std::string_view msg) noexcept
 }
 
 } // namespace wndx
-

@@ -1,9 +1,9 @@
 #pragma once
 // project-wide type aliases
 
-#include <cstdint>              // types, MIN/MAX, etc
+#include <cstdint>    // types, MIN/MAX, etc
 
-#include <filesystem>           // IWYU pragma: keep | fs
+#include <filesystem> // IWYU pragma: keep | fs
 #include <string_view>
 
 namespace wndx {
@@ -39,5 +39,4 @@ using sz_t = std::size_t;
  * For the convenience:
  * To not include Logger declarations separately in each translation unit.
  */
-#include "log.hpp"              // IWYU pragma: keep
-
+#include "log.hpp" // IWYU pragma: keep
