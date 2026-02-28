@@ -11,8 +11,6 @@ Standard: c++20
 IncludeBlocks: Preserve
 SortIncludes: true
 
-AllowShortFunctionsOnASingleLine: InlineOnly
-BreakBeforeBraces: Linux
 BreakConstructorInitializers: BeforeComma
 BreakTemplateDeclarations: Yes
 ColumnLimit: 80
@@ -33,7 +31,10 @@ ReflowComments: Always
 SkipMacroDefinitionBody: true
 WrapNamespaceBodyWithEmptyLines: Always
 
-## === ALIGN OPTIONS BEG === ##
+AllowShortCaseExpressionOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: InlineOnly
+
 AlignArrayOfStructures: Left
 # AlignConsecutiveAssignments:  Consecutive
 AlignConsecutiveBitFields:    Consecutive
@@ -49,7 +50,28 @@ AlignOperands: AlignAfterOperator
 AlignTrailingComments:
   Kind: Always
   OverEmptyLines: 1
-## === ALIGN OPTIONS END === ##
+
+Cpp11BracedListStyle: false
+SpaceBeforeCpp11BracedList: false
+BreakBeforeBraces: Custom
+BraceWrapping: ## BreakBeforeBraces: Linux - Cpp Extended
+  AfterCaseLabel: false
+  AfterClass: true
+  AfterControlStatement: MultiLine
+  AfterEnum: true
+  AfterExternBlock: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyNamespace: true
+  SplitEmptyRecord: true
 
 ## clang-format 22
 # NumericLiteralCase:
