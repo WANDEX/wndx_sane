@@ -6,7 +6,7 @@
 #include <filesystem> // IWYU pragma: keep | fs
 #include <string_view>
 
-namespace wndx {
+namespace wndx::sane {
 
 // @brief wrapper for forced computation at compile time.
 // the destructor of the type used in the function must be constexpr.
@@ -32,7 +32,7 @@ using u64 = uint64_t;
 using sv_t = std::string_view;
 using sz_t = std::size_t;
 
-} // namespace wndx
+} // namespace wndx::sane
 
 /**
  * In the end of the file after defining project-wide aliases.

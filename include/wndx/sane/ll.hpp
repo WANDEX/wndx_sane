@@ -14,7 +14,7 @@
 // clang-format on
 
 
-namespace wndx {
+namespace wndx::sane {
 
 // Log Level - log msg have Log Level.
 // The higher the level, the fewer messages.
@@ -29,19 +29,19 @@ enum class LL // NOLINT(performance-enum-size)
   CRIT,       // CRITICAL
 };
 
-} // namespace wndx
+} // namespace wndx::sane
 
 // NOTE: fmt demands to specialize/declare this here!
 // [template_spec_redecl_out_of_scope].
 // @brief format enum log levels in the readable text form.
 template <>
-struct fmt::formatter<wndx::LL> : formatter<string_view>
+struct fmt::formatter<wndx::sane::LL> : formatter<string_view>
 {
-  auto format(wndx::LL ll, format_context& ctx) const
+  auto format(wndx::sane::LL ll, format_context& ctx) const
       -> format_context::iterator;
 };
 
 #if WNDX_LOG_OSTREAM_SUPPORT
 // overload std::ostream (to output Log Level as text)
-std::ostream& operator<<(std::ostream& os, wndx::LL ll);
+std::ostream& operator<<(std::ostream& os, wndx::sane::LL ll);
 #endif // WNDX_LOG_OSTREAM_SUPPORT

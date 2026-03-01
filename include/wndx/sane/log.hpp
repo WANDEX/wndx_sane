@@ -12,7 +12,7 @@
 #include <string_view>
 
 
-namespace wndx {
+namespace wndx::sane {
 
 class Logger final
 {
@@ -69,11 +69,11 @@ private:
  * (usually logger is needed for the whole life of the program anyway!) */
 inline Logger log_g{}; // NOLINT(*-avoid-non-const-global-variables)
 
-} // namespace wndx
+} // namespace wndx::sane
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #ifndef WNDX_LOG
 #define WNDX_LOG(LL, ...) \
-wndx::log_g.log(__FILE__, __LINE__, LL, __VA_ARGS__)
+wndx::sane::log_g.log(__FILE__, __LINE__, LL, __VA_ARGS__)
 #endif // WNDX_LOG
 // NOLINTEND(cppcoreguidelines-macro-usage)

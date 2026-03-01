@@ -22,7 +22,7 @@
 // clang-format on
 
 
-namespace wndx {
+namespace wndx::sane {
 
 Logger::Logger(fs::path log_fpath) noexcept
     : m_log_fpath{ std::move(log_fpath) }
@@ -77,4 +77,4 @@ void Logger::errnum(int errnum, std::string_view msg) noexcept
   WNDX_LOG(LL::CRIT, "{}\n\terrno: {}\n", msg, strerror(errnum));
 }
 
-} // namespace wndx
+} // namespace wndx::sane
