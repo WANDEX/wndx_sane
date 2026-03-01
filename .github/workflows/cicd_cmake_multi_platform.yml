@@ -28,7 +28,7 @@ env:
   PRJ_NAME   : "wndx_sane"
   TESTS_DIR  : "tests/units"
   BUILD_TESTS: "WNDX_SANE_BUILD_TESTS=ON"
-  MEMCHECK   : "WNDX_SANE_MEMCHECK_ENABLE=OFF"
+  MEMCHECK   : "WNDX_SANE_MEMCHECK_ENABLE=ON"
 
 jobs:
   multi-build-test-deploy:
