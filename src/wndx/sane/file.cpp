@@ -42,7 +42,7 @@ namespace wndx::sane::file {
  * @param  force/insist on importance of the access rights to the dir.
  * @return 0 on success, else non zero return code.
  */
-[[nodiscard]] rc mkdir(fs::path const& dpath, fs::perms const& perms,
+[[nodiscard]] rc mkdir(fs::path const& dpath, fs::perms perms,
                        bool force) noexcept
 {
   static constexpr auto fn{ "file::mkdir()" };
