@@ -5,6 +5,7 @@ target_sources(sane_src
     ll.cpp
     log.cpp
     path.cpp
+    sig_handler.cpp
 )
 
 ## to make sane_deps target archive not empty, for the macOS =>
