@@ -1,5 +1,7 @@
 #pragma once
-// project-wide type aliases
+/// project-wide type aliases
+
+#include "rc.hpp"     // IWYU pragma: keep
 
 #include <cstdint>    // types, MIN/MAX, etc
 
@@ -8,16 +10,16 @@
 
 namespace wndx::sane {
 
-// @brief wrapper for forced computation at compile time.
-// the destructor of the type used in the function must be constexpr.
+/// \brief wrapper for forced computation at compile time.
+/// the destructor of the type used in the function must be constexpr.
 consteval auto cmpl_time(auto value) { return value; }
 
 namespace fs = std::filesystem; // NOLINT(misc-unused-alias-decls)
 
-// easiest way to access the suffixes: s, sv, etc.
+/// easiest way to access the suffixes: s, sv, etc.
 using namespace std::literals;
 
-// alias for shortness & consistency across the project codebase.
+/// aliases for shortness & consistency across the projects codebase.
 
 using s8  = int8_t;
 using s16 = int16_t;
@@ -34,9 +36,6 @@ using sz_t = std::size_t;
 
 } // namespace wndx::sane
 
-/**
- * In the end of the file after defining project-wide aliases.
- * For the convenience:
- * To not include Logger declarations separately in each translation unit.
- */
+/// In the end of the file after defining project-wide aliases & convenience.
+/// To not include logger declarations separately in each translation unit.
 #include "log.hpp" // IWYU pragma: keep
