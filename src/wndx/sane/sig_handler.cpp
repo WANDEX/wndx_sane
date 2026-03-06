@@ -27,23 +27,35 @@
 
 namespace wndx::sane::sig {
 
+/// \brief platform specific clean exit.
+void platform_clean_exit(int status)
+{
+#if defined(_WIN32)
+  ExitProcess(status);
+#elif defined(__linux__) || defined(__APPLE__)
+  _exit(status); // skip stdio cleanup for daemons
+#else
+  std::exit(status); // NOLINT(concurrency-mt-unsafe)
+#endif
+}
+
 static constexpr auto fmt{ "\nSIG {:2}: [{}] {} {}\n\n" };
 
 void print(LL ll, int sig, std::string_view const extra_msg)
 {
-  WNDX_LOG(ll, fmt, sig, SIG{ sig }, "signal caught.", extra_msg);
+  WNDX_LOG(ll, fmt, sig, SIG{ sig }, "received.", extra_msg);
 }
 
 void print(int sig, std::string_view const extra_msg)
 {
-  WNDX_LOG(LL::NTFY, fmt, sig, SIG{ sig }, "signal caught.", extra_msg);
+  WNDX_LOG(LL::NTFY, fmt, sig, SIG{ sig }, "received.", extra_msg);
 }
 
 /// ref: sigaction(2), sigaction(3p)
 /// SIGKILL or SIGSTOP "cannot be caught or ignored",
 /// ancestors probably meant: should not be caught and ignored!?.
 /// So that even the most disgusting program can be killed etc.
-void handler(int sig)
+void handlers(int sig)
 {
   switch (SIG{ sig }) {
   // default behavior for the all not explicitly handled signals =>
@@ -55,7 +67,7 @@ void handler(int sig)
 /// \brief set the handler function as the handler for all possible signals.
 /// (except SIGKILL & SIGSTOP) ref: sigaction(2), signal(2), signal(7).
 /// descriptions took from the signal(7).
-void handler_set(void (*handler)(int sig))
+void handlers_set_defaults(void (*handler)(int sig))
 {
   struct sigaction siga{};
   siga.sa_handler = handler;
@@ -81,11 +93,9 @@ void handler_set(void (*handler)(int sig))
     // finish our program gracefully (correctly) on all other signals.
     if (sigaction(sig, &siga, nullptr) == -1) {
       print(sig, "-> FAILED to set handler for this system signal! EXIT.");
-      exit(EXIT_FAILURE);
+      platform_clean_exit(EXIT_FAILURE);
     }
   }
 }
-
-void handler() { handler_set(handler); }
 
 } // namespace wndx::sane::sig

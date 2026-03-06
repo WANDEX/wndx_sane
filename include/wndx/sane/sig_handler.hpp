@@ -6,10 +6,8 @@ namespace wndx::sane::sig {
 
 void print(int sig, std::string_view extra_msg);
 
-void handler(int sig);
+void handlers(int sig);
 
-void handler_set(void (*handler)(int sig));
-
-void handler();
+void handlers_set_defaults(void (*handler)(int sig));
 
 } // namespace wndx::sane::sig
