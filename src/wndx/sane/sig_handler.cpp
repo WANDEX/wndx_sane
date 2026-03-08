@@ -2,21 +2,26 @@
 /// main purpose of which -> finish program gracefully (correctly)
 /// upon receiving one of the known signals.
 ///
-/// NOTE ref: signal(7)
 /// The default action for an unhandled real-time signal is
 /// to terminate the receiving process.
+/// ref: signal(7) https://man7.org/linux/man-pages/man7/signal.7.html
+///
+/// other relevant refs:
+/// https://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html
+/// https://pubs.opengroup.org/onlinepubs/7908799/xsh/_exit.html
+/// https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/exit-exit-exit?view=msvc-170
 
 #include "wndx/sane/aliases.hpp" // IWYU pragma: keep
 
-#include "wndx/sane/sig.hpp"     // IWYU pragma: keep
+#include "wndx/sane/pl.hpp"
+#include "wndx/sane/sig.hpp" // IWYU pragma: keep
 
-#include <csignal>               // IWYU pragma: keep | sigaction, SIGRTMAX
+#include <csignal>           // IWYU pragma: keep | sigaction, SIGRTMAX
 #include <string_view>
-
 
 // clang-format off
 #ifndef SIGRTMAX
-// Darwin macOS see: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/signal.h
+/// Darwin macOS see: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/signal.h
 #define SIGRTMAX 32
 #ifdef  warning
 #warning "<signal.h> does not provide SIGRTMAX, assuming SIGRTMAX=32"
@@ -26,18 +31,6 @@
 
 
 namespace wndx::sane::sig {
-
-/// \brief platform specific clean exit.
-void platform_clean_exit(int status)
-{
-#if defined(_WIN32)
-  ExitProcess(status);
-#elif defined(__linux__) || defined(__APPLE__)
-  _exit(status); // skip stdio cleanup for daemons
-#else
-  std::exit(status); // NOLINT(concurrency-mt-unsafe)
-#endif
-}
 
 static constexpr auto fmt{ "\nSIG {:2}: [{}] {} {}\n\n" };
 
@@ -93,7 +86,7 @@ void handlers_set_defaults(void (*handler)(int sig))
     // finish our program gracefully (correctly) on all other signals.
     if (sigaction(sig, &siga, nullptr) == -1) {
       print(sig, "-> FAILED to set handler for this system signal! EXIT.");
-      platform_clean_exit(EXIT_FAILURE);
+      wndx::sane::exit(EXIT_FAILURE);
     }
   }
 }

@@ -5,6 +5,7 @@ target_sources(sane_src
     ll.cpp
     log.cpp
     path.cpp
+    pl.cpp
     sig_handler.cpp
 )
 
