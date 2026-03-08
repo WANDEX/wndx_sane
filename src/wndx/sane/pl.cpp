@@ -9,7 +9,7 @@ namespace wndx::sane {
 void exit(int status)
 {
 #if defined(_WIN32)
-  ExitProcess(status);
+  ExitProcess(static_cast<unsigned int>(status)); // UINT
 #elif defined(__linux__) || defined(__APPLE__)
   _exit(status);
 #else // fallback for not explicitly specified platforms
