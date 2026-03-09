@@ -25,36 +25,26 @@
 ///   Such behavior may be unexpected and harmful for the projects which
 ///   do not include all required project headers manually, but rely on the
 ///   default behavior while they include one of the Windows OS API headers.
+///
+/// #include <windows.h>
+///   required to be included before all other WIN32 API headers!
+///     otherwise -> winnt.h: #error: "No Target Architecture"
+///
 /// \see:
 ///   https://devblogs.microsoft.com/oldnewthing/20091130-00/?p=15863
 ///   https://news.ycombinator.com/item?id=36578047
+///   https://stackoverflow.com/a/71591534 - order of includes matters!
 
 // clang-format off
-/// Clang on Windows is missing the Windows target architecture macro.
-/// Windows SDK headers (winnt.h) require at least one of the target architectures
-/// to be defined before including any Windows headers.
-/// \see:
-///   https://learn.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=msvc-170
-#ifdef  _MSC_VER // clang on Windows define _MSC_VER!
-#ifndef _WIN32   // => define required missing defaults
-#define _WIN32 1
-#define _WIN64 1
-#endif//_WIN32
-#ifndef _M_AMD64
-#define _M_AMD64 100
-#define _M_X64 100
-#endif//_M_AMD64
-#endif//_MSC_VER
-
 #ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-/// https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-exitprocess
+#endif//WIN32_LEAN_AND_MEAN
+#include <windows.h>           // required before WIN32 API headers!
 #include <processthreadsapi.h> // ExitProcess()
 #elif defined(__linux__) || defined(__APPLE__)
-/// https://www.man7.org/linux/man-pages/man2/exit.2.html
 #include <unistd.h>            // _exit()
 #else // fallback to stdlib (less res. cleaning, not thread safe, impl. defined)
-/// https://en.cppreference.com/w/cpp/header/cstdlib.html
 #include <cstdlib>             // std::exit, EXIT_FAILURE
 #endif//SYSLIBS includes
 

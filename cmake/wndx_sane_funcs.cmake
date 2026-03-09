@@ -45,6 +45,17 @@ function(wndx_sane_build_type ARG)
   endif()
 endfunction(wndx_sane_build_type)
 
+## useful for the use in Generator Expressions.
+##
+## wndx_sane_not_defined(WIN32_LEAN_AND_MEAN)
+## $<$<BOOL:${NOT_DEFINED_WIN32_LEAN_AND_MEAN}>:WIN32_LEAN_AND_MEAN=1>
+function(wndx_sane_not_defined ARG)
+  if(NOT DEFINED ${ARG})
+    set(NOT_DEFINED_${ARG} TRUE  PARENT_SCOPE)
+  else()
+    set(NOT_DEFINED_${ARG} FALSE PARENT_SCOPE)
+  endif()
+endfunction(wndx_sane_not_defined)
 
 ## define variables to be able to use short & readable if conditions
 ## creation of variables to be able to use them later

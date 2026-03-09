@@ -57,6 +57,18 @@ void handlers(int sig)
   }
 }
 
+#ifdef _WIN32
+
+/// handling system signals on Windows platform currently not supported
+/// by the wndx::sane lib.
+void handlers_set_defaults(void (*handler)(int sig))
+{
+  // portable fix: warning: unused parameter [-Wunused-parameter]
+  (void)handler;
+}
+
+#else  // UNIX SIGNALS BEGIN
+
 /// \brief set the handler function as the handler for all possible signals.
 /// (except SIGKILL & SIGSTOP) ref: sigaction(2), signal(2), signal(7).
 /// descriptions took from the signal(7).
@@ -90,5 +102,7 @@ void handlers_set_defaults(void (*handler)(int sig))
     }
   }
 }
+
+#endif // UNIX SIGNALS END
 
 } // namespace wndx::sane::sig

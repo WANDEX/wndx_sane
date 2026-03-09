@@ -6,6 +6,14 @@
 namespace wndx::sane {
 
 /// \brief platform specific exit - clean, thread safe.
+///
+/// \see:
+///   https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-exitprocess
+///   https://www.man7.org/linux/man-pages/man2/exit.2.html
+///   https://en.cppreference.com/w/cpp/header/cstdlib.html
+/// other ref:
+///   https://pubs.opengroup.org/onlinepubs/7908799/xsh/_exit.html
+///   https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/exit-exit-exit?view=msvc-170
 void exit(int status)
 {
 #if defined(_WIN32)

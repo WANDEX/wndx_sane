@@ -132,6 +132,14 @@ jobs:
       run  : |
         echo "dir_path_env=${{ steps.str2.outputs.dir_path_build }}/env" >> "$GITHUB_OUTPUT"
         echo "dir_path_deploy=${{ steps.str2.outputs.dir_path_build }}/deploy" >> "$GITHUB_OUTPUT"
+        case "${{ matrix.gen }}" in
+        "Visual Studio"*)
+          echo "cplname=x64" >> "$GITHUB_OUTPUT"
+        ;;
+        *)
+          echo "cplname=" >> "$GITHUB_OUTPUT"
+        ;;
+        esac
 
     - name: --strip will be used on the binaries of build type Release
       if   : ${{ matrix.bt == 'Release' }}
@@ -278,7 +286,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{ steps.str2.outputs.dir_path_build }}
       run : >
-        cmake -S .. -B . -G "${{ matrix.gen }}" --log-level=DEBUG
+        cmake -S .. -B . -G "${{ matrix.gen }}" -A "${{ steps.str3.outputs.cplname }}" --log-level=DEBUG
         -D CMAKE_INSTALL_PREFIX=${{ steps.str3.outputs.dir_path_deploy }}
         -D CMAKE_CXX_COMPILER=${{ matrix.cxx }}
         -D CMAKE_C_COMPILER=${{ matrix.cc }}

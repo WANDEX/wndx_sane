@@ -3,6 +3,7 @@ include_guard(GLOBAL)
 
 ## wndx_sane_under_compiler()
 ## wndx_sane_tgt_add_check_cxx_compiler_flag()
+## wndx_sane_not_defined()
 include(wndx_sane_funcs)
 
 ## -- >> pfx: wndx    name: sane::deps    tgt: sane_deps
@@ -272,5 +273,27 @@ function(wndx_sane_create_targets) ## args
     )
 
     ## flags for other compilers should be here
+  endif()
+
+  ## NOTE: Windows is missing default target architecture macro.
+  ## Windows SDK headers (winnt.h) require at least one of the target architectures
+  ## to be defined explicitly before including any Windows headers.
+  ##
+  ## Defining default value via CMAKE_GENERATOR_PLATFORM - does not work!
+  ## The only working solution on windows is to explicitly pass at configure time:
+  ##   cmake -A <platform-name>
+  ##
+  ## otherwise - error: "No Target Architecture"
+  ## In file included from C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\processthreadsapi.h:18:
+  ## In file included from C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\minwindef.h:182:
+  ## C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\winnt.h:169:2: error: "No Target Architecture"
+  ##
+  ## \see:
+  ##   https://learn.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=msvc-170
+  if(MSVC OR WIN32)
+    wndx_sane_not_defined(WIN32_LEAN_AND_MEAN)
+    target_compile_definitions(${arg_LIB}_src PRIVATE
+      $<$<BOOL:${NOT_DEFINED_WIN32_LEAN_AND_MEAN}>:WIN32_LEAN_AND_MEAN>
+    )
   endif()
 endfunction(wndx_sane_create_targets)
