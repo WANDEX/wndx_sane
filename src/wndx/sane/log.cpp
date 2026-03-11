@@ -40,7 +40,10 @@ void Logger::trace_to_the_file(char const* file, int line, LL ll)
 void Logger::vlog(char const* file, int line, LL ll, fmt::string_view fmt,
                   fmt::format_args args)
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-conversion"
   fmt::print(stderr, "[{}]: {}", ll, fmt::vformat(fmt, args));
+#pragma clang diagnostic pop
   // TODO: also write message into the log file.
   // XXX : maybe use this?
   // https://github.com/PlatformLab/NanoLog
