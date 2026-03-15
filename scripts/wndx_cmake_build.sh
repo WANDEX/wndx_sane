@@ -31,8 +31,8 @@ at_path() { hash "$1" >/dev/null 2>&1 ;} # if $1 is found at $PATH -> return 0
 ## "OPTION DEFAULTS" - project specific, they may be changed between the projects freely.
 ## In other cases, version should be bumped, then updated script must be propagated
 ## to older versions of the script and changes must be merged except "OPTION DEFAULTS".
-VERSION="1.3.0"
-VERSION_DATE="2026-02-26" # update at each VERSION bump
+VERSION="1.3.1"
+VERSION_DATE="2026-03-13" # update at each VERSION bump
 
 bname="wndx_cmake_build.sh"; at_path basename && bname=$(basename "$0")
 USAGE="\
@@ -112,13 +112,17 @@ check_prerequisites() {
 
 check_prerequisites
 
+## do not override, on win10 in MINGW64:/git-bash shell
+## $(uname -s)="MINGW64_NT-10.0-19045"
+## time() { "$CMAKE" -E time "$@" ;}
+## overriding time function leads to weird error!
+
 echo()  { "$CMAKE" -E echo_append "$*"    ;}
 echon() { "$CMAKE" -E echo "$*"           ;}
 false() { "$CMAKE" -E false               ;}
 mkdir() { "$CMAKE" -E make_directory "$1" ;}
 rm_f()  { "$CMAKE" -E rm  -f "$1"         ;}
 rm_rf() { "$CMAKE" -E rm -rf "$1"         ;}
-time()  { "$CMAKE" -E time "$@"           ;}
 true()  { "$CMAKE" -E true                ;}
 
 get_prj_name() {
@@ -380,7 +384,7 @@ use_linker_mold() {
   *"CMAKE_LINKER_TYPE"*) return ;;
   esac
   if ! at_path mold; then
-    printe "%b%s%b\n" "${YEL}" "mold linker not fount at \$PATH!" "${END}"
+    printe "%b%s%b\n" "${YEL}" "mold linker not found at \$PATH!" "${END}"
     return
   fi
   pl=$(uname)
