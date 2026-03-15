@@ -1,21 +1,8 @@
-// Logger implementation
+/// Logger using fmtlib impl.
 
 #include "wndx/sane/log.hpp"
 
-#include "wndx/sane/aliases.hpp" // IWYU pragma: keep
-
-#include <fmt/core.h>
-#include <fmt/format.h>
-
-#include <utility>
-
-
 // clang-format off
-// toggle showing of the line number : file path
-#ifndef WNDX_LOG_TRACE_TO_THE_FILE
-#define WNDX_LOG_TRACE_TO_THE_FILE 1
-#endif//WNDX_LOG_TRACE_TO_THE_FILE
-
 #ifndef WNDX_LOG_INLINE_BUFFER_SIZE
 #define WNDX_LOG_INLINE_BUFFER_SIZE 250
 #endif//WNDX_LOG_INLINE_BUFFER_SIZE
@@ -37,24 +24,6 @@ void Logger::trace_to_the_file(char const* file, int line, LL ll)
   fmt::print(stderr, "{:>6}: \"{}\"\n", line, file);
 }
 
-void Logger::vlog(char const* file, int line, LL ll, fmt::string_view fmt,
-                  fmt::format_args args)
-{
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
-  fmt::print(stderr, "[{}]: {}", ll, fmt::vformat(fmt, args));
-#pragma clang diagnostic pop
-  // TODO: also write message into the log file.
-  // XXX : maybe use this?
-  // https://github.com/PlatformLab/NanoLog
-#if WNDX_LOG_TRACE_TO_THE_FILE
-  trace_to_the_file(file, line, ll);
-#else // portable fix: warning: unused parameter [-Wunused-parameter]
-  (void)file;
-  (void)line;
-#endif
-}
-
 [[nodiscard]] fs::path Logger::get_log_fpath() noexcept { return m_log_fpath; }
 
 [[nodiscard]] LL Logger::get_urgency() noexcept { return m_urgency_level; }
@@ -65,9 +34,7 @@ void Logger::set_urgency(LL ll) noexcept
   WNDX_LOG(LL::NTFY, "forced urgency level = {}\n", ll);
 }
 
-/**
- * @brief cross-platform, thread-safe alternative to the std::strerror.
- */
+/// \brief cross-platform, thread-safe alternative to the std::strerror.
 [[nodiscard]] static auto strerror(int errnum) noexcept
 {
   fmt::basic_memory_buffer<char, WNDX_LOG_INLINE_BUFFER_SIZE> obuf;

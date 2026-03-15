@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fmt/format.h>
+#include "ll.hpp"
 
 
 namespace wndx::sane {
@@ -48,9 +48,7 @@ enum class rc // NOLINT(performance-enum-size)
 
 } // namespace wndx::sane
 
-// fmt demands to specialize/declare this here!
-// [template_spec_redecl_out_of_scope].
-// @brief format enum SIG in the readable text form.
+/// \brief format enum SIG in the readable text form.
 template <>
 struct fmt::formatter<wndx::sane::rc> : formatter<string_view>
 {
@@ -104,8 +102,10 @@ struct fmt::formatter<wndx::sane::rc> : formatter<string_view>
   }
 };
 
-// overload for the std::ostream (to print rc in the readable text form)
+#if WNDX_LOG_OSTREAM_SUPPORT
+/// overload for the std::ostream (to print rc in the readable text form)
 inline std::ostream& operator<<(std::ostream& os, wndx::sane::rc rc)
 {
   return os << fmt::to_string(rc);
 }
+#endif // WNDX_LOG_OSTREAM_SUPPORT

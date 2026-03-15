@@ -1,12 +1,12 @@
 #pragma once
 /// project-wide type aliases
 
-#include "rc.hpp"     // IWYU pragma: keep
-
 #include <cstdint>    // types, MIN/MAX, etc
 
 #include <filesystem> // IWYU pragma: keep | fs
 #include <string_view>
+#include <utility>    // IWYU pragma: keep | std::move etc.
+
 
 namespace wndx::sane {
 
@@ -20,7 +20,6 @@ namespace fs = std::filesystem; // NOLINT(misc-unused-alias-decls)
 using namespace std::literals;
 
 /// aliases for shortness & consistency across the projects codebase.
-
 using s8  = int8_t;
 using s16 = int16_t;
 using s32 = int32_t;
@@ -39,3 +38,4 @@ using sz_t = std::size_t;
 /// In the end of the file after defining project-wide aliases & convenience.
 /// To not include logger declarations separately in each translation unit.
 #include "log.hpp" // IWYU pragma: keep
+#include "rc.hpp"  // IWYU pragma: keep
