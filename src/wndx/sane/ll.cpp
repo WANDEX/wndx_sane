@@ -1,8 +1,6 @@
 
 #include "wndx/sane/ll.hpp"
 
-#include <fmt/format.h>
-
 
 auto fmt::formatter<wndx::sane::LL>::format(wndx::sane::LL ll, format_context& ctx) const
     -> format_context::iterator
@@ -20,10 +18,27 @@ auto fmt::formatter<wndx::sane::LL>::format(wndx::sane::LL ll, format_context& c
   return formatter<string_view>::format(name, ctx);
 }
 
+// auto fmt::formatter<std::filesystem::path>::format(std::filesystem::path const& p, format_context& ctx) const
+    // -> format_context::iterator
+// {
+  // return format_to(ctx.out(), "{}", p.u8string()); // XXX
+  // return formatter<std::u8string_view>::format(p.u8string(), ctx);
+// }
+
+auto fmt::formatter<std::filesystem::path>::format(std::filesystem::path const& p, format_context& ctx) const
+    -> format_context::iterator
+{
+  return formatter<string_view>::format(p.string(), ctx);
+}
+
 #if WNDX_LOG_OSTREAM_SUPPORT
-// overload std::ostream (to output Log Level as text)
 std::ostream& operator<<(std::ostream& os, wndx::sane::LL ll)
 {
   return os << fmt::to_string(ll);
+}
+
+std::ostream& operator<<(std::ostream& os, std::filesystem::path const& p)
+{
+  return os << fmt::to_string(p);
 }
 #endif // WNDX_LOG_OSTREAM_SUPPORT
