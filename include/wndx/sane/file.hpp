@@ -53,7 +53,11 @@ public:
   File(File const&)            = default;
   File& operator=(File&&)      = delete;
   File& operator=(File const&) = delete;
+#if (__cplusplus >= 202302L) // constexpr dtor is c++23
+  constexpr ~File() noexcept;
+#else
   ~File() noexcept;
+#endif
 
   /// \brief construct class instance from the file path & its size.
   explicit File(fs::path fpath, std::size_t sz) noexcept;
@@ -62,7 +66,7 @@ public:
   explicit File(Finfo const& finfo, fs::path const& dpath) noexcept;
 
   /// \brief cleanup facilities for the heap.
-  void clean_heap() noexcept;
+  constexpr void clean_heap() noexcept;
 
   /// \brief convert essentials of the instance into file info structure.
   [[nodiscard]] Finfo to_finfo() const noexcept;
@@ -155,7 +159,7 @@ public:
     return operator>(rhs) || operator==(rhs);
   }
 
-private:
+protected:
   std::size_t m_block_size{ 0 };
   fs::path    m_fpath{};
   char_type*  m_block{ nullptr }; // memory block -> contiguous chunk of memory.

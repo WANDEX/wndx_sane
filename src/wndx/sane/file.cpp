@@ -119,13 +119,21 @@ File::File(Finfo const& finfo, fs::path const& dpath) noexcept
   WNDX_LOG(LL::DBUG, "{} from Finfo & dir path:\n\t{}\n", ctor, *this);
 }
 
-void File::clean_heap() noexcept
+constexpr void File::clean_heap() noexcept
 {
   delete[] m_block;
   m_block = nullptr;
 }
 
-File::~File() noexcept { clean_heap(); }
+
+#if (__cplusplus >= 202302L) // constexpr dtor is c++23
+constexpr File::~File() noexcept
+#else
+File::~File() noexcept
+#endif
+{
+  clean_heap();
+}
 
 [[nodiscard]] Finfo File::to_finfo() const noexcept
 {
