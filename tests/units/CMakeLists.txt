@@ -19,6 +19,11 @@ endif()
 
 target_link_libraries(tests_units PRIVATE gtest::gtest)
 
+## explicitly set properties to be able to get them later.
+set_target_properties(tests_units PROPERTIES
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+)
+
 ## copy data dir so that tests have required tests data.
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/data"
   DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"

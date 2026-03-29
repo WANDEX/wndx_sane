@@ -15,10 +15,38 @@ function(wndx_sane_memcheck) ## args
   )
   set(fun "wndx_sane_memcheck()")
 
+  if(NOT arg_TGT_NAME MATCHES "^.+$")
+    message(FATAL_ERROR "${fun} TGT_NAME not provided!")
+  endif()
+  if(NOT arg_TGT_EXEC MATCHES "^.+$")
+    message(FATAL_ERROR "${fun} TGT_EXEC not provided!")
+  endif()
+
+  ## split on executable name and trailing arguments if any
+  if(FALSE) # regex way
+    set(exec_re "[A-Za-z0-9_.-]+") # regex match executable name
+    string(REGEX MATCH   "${exec_re}" tgt_exec "${arg_TGT_EXEC}")
+    string(REGEX REPLACE "^[^;]?${exec_re};" "" tgt_opts "${arg_TGT_EXEC}")
+  else() # list way
+    list(POP_FRONT  arg_TGT_EXEC tgt_exec)
+    set (tgt_opts ${arg_TGT_EXEC})
+  endif()
+  message(DEBUG "${fun} TGT_EXEC name: ${tgt_exec}")
+  message(DEBUG "${fun} TGT_EXEC opts: ${tgt_opts}")
+  if(NOT TARGET ${tgt_exec})
+    message(FATAL_ERROR "${fun} TGT_EXEC executable name: '${tgt_exec}' - TARGET not exist!")
+  endif()
+
   ## use default value if not explicitly provided
   if(NOT arg_WORKING_DIRECTORY OR arg_KEYWORDS_MISSING_VALUES MATCHES ".*WORKING_DIRECTORY.*")
     list(REMOVE_ITEM arg_KEYWORDS_MISSING_VALUES "WORKING_DIRECTORY")
-    set(arg_WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    get_target_property(tgt_exec_wd ${tgt_exec} WORKING_DIRECTORY)
+    if(tgt_exec_wd)
+      set(arg_WORKING_DIRECTORY "${tgt_exec_wd}")
+    else() # => tgt_exec_wd-NOTFOUND
+      set(arg_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}") # fallback
+    endif()
+    message(DEBUG "${fun} WORKING_DIRECTORY: ${arg_WORKING_DIRECTORY}")
   endif()
 
   ## use default value if not explicitly provided
@@ -44,13 +72,6 @@ function(wndx_sane_memcheck) ## args
   endif()
   if(arg_KEYWORDS_MISSING_VALUES)
     message(WARNING " MISSING: ${fun} ${arg_KEYWORDS_MISSING_VALUES}")
-  endif()
-
-  if(NOT arg_TGT_NAME MATCHES "^.+$")
-    message(FATAL_ERROR "${fun} TGT_NAME not provided!")
-  endif()
-  if(NOT arg_TGT_EXEC MATCHES "^.+$")
-    message(FATAL_ERROR "${fun} TGT_EXEC not provided!")
   endif()
 
   ## use default drmemory_suppress file located in the project root dir if file is readable.
@@ -79,21 +100,6 @@ function(wndx_sane_memcheck) ## args
   if(arg_EXIT_ON_FIRST_ERROR)
     list(APPEND arg_VALGRIND_OPTS --exit-on-first-error=yes)
     list(APPEND arg_DRMEMORY_OPTS -crash_at_error)
-  endif()
-
-  ## split on executable name and trailing arguments if any
-  if(FALSE) # regex way
-    set(exec_re "[A-Za-z0-9_.-]+") # regex match executable name
-    string(REGEX MATCH   "${exec_re}" tgt_exec "${arg_TGT_EXEC}")
-    string(REGEX REPLACE "^[^;]?${exec_re};" "" tgt_opts "${arg_TGT_EXEC}")
-  else() # list way
-    list(POP_FRONT  arg_TGT_EXEC tgt_exec)
-    set (tgt_opts ${arg_TGT_EXEC})
-  endif()
-  message(DEBUG "${fun} TGT_EXEC name: ${tgt_exec}")
-  message(DEBUG "${fun} TGT_EXEC opts: ${tgt_opts}")
-  if(NOT TARGET ${tgt_exec})
-    message(FATAL_ERROR "${fun} TGT_EXEC executable name: '${tgt_exec}' - TARGET not exist!")
   endif()
 
   ## NOTE: USES_TERMINAL with Ninja Generator on APPLE platform under AppleClang compiler,
