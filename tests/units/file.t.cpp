@@ -58,11 +58,12 @@ public:
   file::File
   alloc_file(std::string const& file_name = "ascii_1.txt") const noexcept
   {
-    fs::path dp;
-    fs::path fp;
+    fs::path        dp;
+    fs::path        fp;
+    std::error_code ec{};
     EXPECT_NO_THROW({
-      dp = "./data";
-      fp = dp / file_name;
+      dp = fs::absolute("data");
+      fp = fs::canonical(dp / file_name);
     });
     file::File File(fp, fs::file_size(fp));
     alloc_read_check(File);
