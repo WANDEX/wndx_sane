@@ -159,7 +159,7 @@ public:
     return operator>(rhs) || operator==(rhs);
   }
 
-protected:
+private:
   std::size_t m_block_size{ 0 };
   fs::path    m_fpath{};
   char_type*  m_block{ nullptr }; // memory block -> contiguous chunk of memory.
