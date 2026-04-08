@@ -1,6 +1,16 @@
 #pragma once
 /// enum class SIG with fmt format specialization.
 
+// clang-format off
+#ifndef WNDX_LOG_OSTREAM_SUPPORT
+#define WNDX_LOG_OSTREAM_SUPPORT 1
+#endif//WNDX_LOG_OSTREAM_SUPPORT
+
+#if     WNDX_LOG_OSTREAM_SUPPORT
+#include <ostream>
+#endif//WNDX_LOG_OSTREAM_SUPPORT
+// clang-format on
+
 #include <fmt/format.h>
 
 
@@ -163,8 +173,10 @@ struct fmt::formatter<wndx::sane::sig::SIG> : formatter<string_view>
   }
 };
 
+#if WNDX_LOG_OSTREAM_SUPPORT
 /// overload for the std::ostream (to print SIG in the readable text form)
 inline std::ostream& operator<<(std::ostream& os, wndx::sane::sig::SIG sig)
 {
   return os << fmt::to_string(sig);
 }
+#endif // WNDX_LOG_OSTREAM_SUPPORT
